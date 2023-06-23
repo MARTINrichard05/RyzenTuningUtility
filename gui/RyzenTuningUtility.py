@@ -12,12 +12,14 @@ gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Adw
 
-workingDir = "/home/richou/.var/app/com.nyaker.RyzenTuningUtility/gui"
+key = sys.argv[1]
+user = sys.argv[2]
+
+workingDir = "/home/"+user+"/.var/app/com.nyaker.RyzenTuningUtility/gui"
 
 local_key = randbytes(256)  # this is the key that will be used to authenticate the connection between gui and handler
 local_address = ('localhost', 6006)
 
-key = sys.argv[1]
 connAddress = ('localhost', 6000)  # privilidged daemon
 
 unsecure_address = ('localhost', 6001)

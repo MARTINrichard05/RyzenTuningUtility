@@ -4,9 +4,10 @@ import subprocess
 import sys
 import time
 
-workingDir = "/home/richou/.var/app/com.nyaker.RyzenTuningUtility/daemon"
-
 key = sys.argv[1]
+user = sys.argv[2]
+
+workingDir = "/home/"+user+"/.var/app/com.nyaker.RyzenTuningUtility/daemon"
 
 address = ('localhost', 6000)
 
