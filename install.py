@@ -81,7 +81,6 @@ elif isdir == 1:
     else:
         installMode = "normal"
 
-
 if installMode == "normal":
     install_Core_Files()
     install_Configs()
