@@ -178,13 +178,13 @@ class MainWindow(Gtk.ApplicationWindow):
         conn.send(["AVGPOWER", 0])
         conn.close()
         sleep(0.01)
-        self.templabel.set_label("Max Avg Power : " +str(cpuparams['avgpower'])+"W | enabled : " +str(cpuparams['avgPEdit']))
+        self.avgPlabel.set_label("Max Avg Power : " +str(cpuparams['avgpower'])+"W | enabled : " +str(cpuparams['avgPEdit']))
     def pkPReset_clicked(self, button):
         conn = Client(local_address, authkey=local_key)
         conn.send(["PKPOWER", 0])
         conn.close()
         sleep(0.01)
-        self.templabel.set_label("Max Peak Power : " + str(cpuparams['pkpower']) + "W | enabled : " + str(cpuparams['pkPEdit']))
+        self.pkPlabel.set_label("Max Peak Power : " + str(cpuparams['pkpower']) + "W | enabled : " + str(cpuparams['pkPEdit']))
 
     def tempSlider_changed(self, slider):
         slidervalue = int(slider.get_value())
