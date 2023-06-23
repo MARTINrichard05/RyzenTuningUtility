@@ -26,4 +26,4 @@ if you close it by just pressing the arrow , it will still run in background, to
 click on "kill daemon" button then close the window
 
 ## current state
-This is the first kinda usable version, i will add more features and make it cleaner
+This is the first kinda usable version, INSTALLER FIXED, i will add more features and make it cleaner
