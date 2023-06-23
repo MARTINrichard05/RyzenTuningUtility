@@ -202,16 +202,16 @@ class MainWindow(Gtk.ApplicationWindow):
         conn.send(["AVGPOWER", slidervalue])
         conn.close()
         sleep(0.01)
-        self.templabel.set_label("Max Avg Power : " + str(cpuparams['avgpower']) + "W | enabled : " + str(cpuparams['avgPEdit']))
+        self.avgPlabel.set_label("Max Avg Power : " + str(cpuparams['avgpower']) + "W | enabled : " + str(cpuparams['avgPEdit']))
 
     def pkPslider_changed(self, slider):
         slidervalue = int(slider.get_value())
-        self.avgPlabel.set_label("Max Peak Power : " + str(slidervalue))
+        self.pkPlabel.set_label("Max Peak Power : " + str(slidervalue))
         conn = Client(local_address, authkey=local_key)
         conn.send(["PKPOWER", slidervalue])
         conn.close()
         sleep(0.01)
-        self.templabel.set_label("Max Peak Power : " + str(cpuparams['pkpower']) + "W | enabled : " + str(cpuparams['pkPEdit']))
+        self.pkPlabel.set_label("Max Peak Power : " + str(cpuparams['pkpower']) + "W | enabled : " + str(cpuparams['pkPEdit']))
 
 
     def Exit(self, button):
