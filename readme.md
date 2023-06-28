@@ -11,7 +11,7 @@ It is not made to overclock the cpu or anything like that, just to change some c
 ## install
 # requirements
 `python` `pip`    
-a ryzen cpu compatible with ryzenadj
+a ryzen cpu compatible with ryzenadj  
 a up-to-date linux distro
 
 run `install.sh` as user
