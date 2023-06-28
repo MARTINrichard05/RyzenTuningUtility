@@ -12,7 +12,7 @@ It is not made to overclock the cpu or anything like that, just to change some c
 # requirements
 `python` `pip`    
 a ryzen cpu compatible with ryzenadj
-there must be an executable with the exact name for each dependency (for example : you have python3 executable but not python , in that case create a symbolic link(i will add something in the installer to overcome that))
+a up-to-date linux distro
 
 run `install.sh` as user
 it will ask you for privileges if needed
@@ -26,4 +26,4 @@ if you close it by just pressing the arrow , it will still run in background, to
 click on "kill daemon" button then close the window
 
 ## current state
-This is the first kinda usable version, INSTALLER FIXED, i will add more features and make it cleaner
+Usable, more functions and fixes are comming

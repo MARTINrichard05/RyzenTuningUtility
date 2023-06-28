@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-from subprocess import check_output
+from subprocess import check_output, call
 from multiprocessing import Process
 from multiprocessing.connection import Client
 import os
@@ -14,11 +14,22 @@ connAddress = ('localhost', 6001)
 
 
 def startDaemon():
-    os.system('pkexec python ' + path + '/daemon/RyzenTuningDaemon.py ' + str(key) + ' ' + user)
+    call(('pkexec', python, path + '/daemon/RyzenTuningDaemon.py', str(key), user))
+    #os.system('pkexec '+ python+ ' ' + path + '/daemon/RyzenTuningDaemon.py ' + str(key) + ' ' + user)
     #os.system('python ' + path + '/daemon/RyzenTuningDaemon.py ' + str(key))
 
 def startGui():
-    os.system('python ' + path + '/gui/RyzenTuningUtility.py ' + str(key) + ' ' + user)
+    call((python, path + '/gui/RyzenTuningUtility.py', str(key), user))
+    #os.system('python ' + path + '/gui/RyzenTuningUtility.py ' + str(key) + ' ' + user)
+
+if os.path.exists("/usr/bin/python"):
+    python = "python"
+elif os.path.exists("/usr/bin/python3"):
+    python = "python3"
+else:
+    print("=============== python not found ===============")
+    print("Your distro is not currently supported, you can still try to modify the script, please report the problem in github")
+    exit(1)
 
 try :
     arg = sys.argv[1]
