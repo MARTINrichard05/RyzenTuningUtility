@@ -1,6 +1,7 @@
 ### Ryzen Tuning Utility
 
-<img src="screens/1.png"> 
+<img src="screens/1.png">  
+<img src="screens/2.png">  
 
 ## about
 A little program that allow you to easily tune your Ryzen's settings.    

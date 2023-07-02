@@ -2,7 +2,7 @@ from subprocess import check_output, call
 import os
 import sys
 
-version = 1
+version = 2
 user = check_output(['whoami']).decode('utf-8')[:-1]
 WorkingDirectory = os.getcwd()
 
@@ -42,7 +42,8 @@ def install_icon():
 
 def install_libs():
     print("\n======= installing libs =======")
-    call(("pip", "install", "PyGObject"))
+    call(("python",'-m','pip', "install", "PyGObject"))
+    call(("python",'-m','pip', "install", "PyGObject"))
 
 
 def install_Core_Files():
@@ -59,7 +60,14 @@ def install_Core_Files():
     print("\n======= core files copied into " + path + " =======\n")
 
 
-def install_Configs():
+def install_Configs(mode):
+    if mode == 'force':
+        arg = "-f"
+    elif mode == 'normal':
+        arg = "-n"
+    elif mode == 'update':
+        print("\n======= updating config==========\n")
+        print("========= not implemented =========\n")
     for file in configfileslist:
         if file[1] == '':
             pass
@@ -95,11 +103,12 @@ except:
         print('\n======= folder already exist =======\n')
         if os.path.exists(path + "/start.py"):
             print('\n======= detected start.py file, detecting version =======\n')
-            currentversion = check_output([python, path + "/start.py", "version"]).decode('utf-8')
+            currentversion = int(check_output([python, path + "/start.py", "version"]).decode('utf-8'))
             if int(currentversion) == version:
                 selectrepair()
             else:
                 installMode = "update"
+                print('====== update from v' + str(currentversion) + ' to v' + str(version) + ' ======')
         else:
             installMode = "normal"
 
@@ -121,6 +130,6 @@ elif installMode == "repairC":
 elif installMode == "repairB":
     install_Core_Files()
     install_desktopShortcut()
-    install_icon()
+    #install_icon()
 
 print("\n======= done =======")

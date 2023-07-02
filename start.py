@@ -6,7 +6,7 @@ from multiprocessing.connection import Client
 import os
 import random
 
-version = 0
+version = 2
 user = check_output(['whoami']).decode('utf-8')[:-1]
 path = "/home/"+user+"/.var/app/com.nyaker.RyzenTuningUtility"
 key = random.randint(0,999999999999999999)

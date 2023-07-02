@@ -25,10 +25,11 @@ connAddress = ('localhost', 6000)  # privilidged daemon
 unsecure_address = ('localhost', 6001)
 unsecure_key = bytes('open/close', 'ascii')
 
-cpuparams = {"tempEdit": False, "temp": 75,
+params = {"tempEdit": False, "temp": 75,
                           "avgPEdit": False, "avgpower": 10,
                           "pkPEdit": False, "pkpower": 13,
-                          }
+          }
+
 
 
 
@@ -37,11 +38,16 @@ class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.running = True
+
+
         self.set_default_size(600, 250)
         self.set_title("RyzenTuningUtility")
+        self.connect("close-request", self.closewin)
         app = self.get_application()
         sm = app.get_style_manager()
         ## sm.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
+
 
         self.MainBox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.SlidersBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -68,6 +74,49 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_child(self.MainBox)
         self.header.pack_start(self.ExitButton)
         self.MainBox.append(self.SlidersBox)
+
+        connThread = Thread(target=self.connF)
+        connThread.start()
+
+    def closewin(self,arg):
+        self.running = False
+
+    def connF(self):
+        self.conn = Client(local_address, authkey=local_key)
+        while self.running:
+            self.refresh()
+            sleep(0.1)
+        self.conn.close()
+
+    def refresh(self):
+        global params
+
+        if params['tempEdit']: # refreshing temp bar
+            self.disableTemp.set_label('Disable')
+            self.tempbar.set_value(1)
+            if params['temp'] != int(self.tempbar.get_value()):
+                self.TempSlider.set_value(params['temp'])
+        else:
+            self.disableTemp.set_label('Enable')
+            self.tempbar.set_value(0)
+
+        if params["avgPEdit"]:
+            self.DisableAvgPower.set_label('Disable')
+            self.avgbar.set_value(1)
+            if params['avgpower'] != int(self.avgbar.get_value()):
+                self.avgPSlider.set_value(params['avgpower'])
+        else:
+            self.DisableAvgPower.set_label('Enable')
+            self.avgbar.set_value(0)
+
+        if params["pkPEdit"]:
+            self.DisablePkPower.set_label('Disable')
+            self.pkbar.set_value(1)
+            if params['pkpower'] != int(self.pkbar.get_value()):
+                self.pkPSlider.set_value(params['pkpower'])
+        else:
+            self.DisablePkPower.set_label('Enable')
+            self.pkbar.set_value(0)
 
     def readcfg(self):
         with open(workingDir + '/presets.json') as json_file:
@@ -96,128 +145,156 @@ class MainWindow(Gtk.ApplicationWindow):
 
 
     def initTemp(self):
-        global cpuparams
-        self.tempbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.tempbox.set_margin_bottom(15)
+        global params
+        self.tempbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.tempadj = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.tempframe = Gtk.Frame()
+        self.tempframe.set_margin_top(15)
+        self.tempframe.set_margin_end(10)
+        self.tempframe.set_child(self.tempbox)
+        self.templabel = Gtk.Label()
+        self.templabel.set_margin_top(10)
+        self.templabel.set_label("Maximum temperature")
 
-        self.templabel = Gtk.Label(label="Max Temperature : "+str(cpuparams['temp'])+"C | enabled : " +str(cpuparams['tempEdit']))
-        self.templabel.set_margin_top(5)
+        self.tempbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
+        self.tempbar.set_min_value(0)
+        self.tempbar.set_max_value(1)
 
-        self.tempReset = Gtk.Button(label="Reset")
-        self.tempReset.connect('clicked', self.tempReset_clicked)
-        self.tempReset.set_size_request(10,20)
+        #self.templabel = Gtk.Label(label="Max Temperature : "+str(params['temp'])+"C | enabled : " +str(params['tempEdit']))
+        #self.templabel.set_margin_top(5)
+
+        self.disableTemp = Gtk.Button(label="Disable")
+        self.disableTemp.connect('clicked', self.tempReset_clicked)
 
         self.TempSlider = Gtk.Scale()
         self.TempSlider.set_digits(0)  # Number of decimal places to use
         self.TempSlider.set_range(60, 95)
-        self.TempSlider.set_draw_value(False)  # Show a label with current value
-        self.TempSlider.set_value(cpuparams['temp'])  # Sets the current value/position
+        self.TempSlider.set_draw_value(True)  # Show a label with current value
+        self.TempSlider.set_value(params['temp'])  # Sets the current value/position
         self.TempSlider.connect('value-changed', self.tempSlider_changed)
         self.TempSlider.set_hexpand(True) #
 
-        self.SlidersBox.append(self.templabel)
-        self.tempbox.append(self.tempReset)
-        self.tempbox.append(self.TempSlider)
-        self.SlidersBox.append(self.tempbox)
+        self.tempadj.append(self.disableTemp)
+        self.tempadj.append(self.TempSlider)
+        self.tempbox.append(self.tempbar)
+        self.tempbox.append(self.templabel)
+        self.tempbox.append(self.tempadj)
+        self.SlidersBox.append(self.tempframe)
 
     def initavgPower(self):
-        self.avgbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.avgbox.set_margin_bottom(15)
+        self.avgbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.avgedit = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.avgframe = Gtk.Frame()
+        self.avgframe.set_margin_top(15)
+        self.avgframe.set_margin_end(10)
+        self.avgframe.set_child(self.avgbox)
+        self.avgplabel = Gtk.Label()
+        self.avgplabel.set_margin_top(10)
+        self.avgplabel.set_label('Average Power Limit')
 
-        self.avgPlabel = Gtk.Label(label="Max Avg Power : " +str(cpuparams['avgpower'])+"W | enabled : " +str(cpuparams['avgPEdit']))
-        self.avgPlabel.set_margin_top(5)
+        self.avgbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
+        self.avgbar.set_min_value(0)
+        self.avgbar.set_max_value(1)
 
-        self.avgPowerReset = Gtk.Button(label="Reset")
-        self.avgPowerReset.connect('clicked', self.avgPReset_clicked)
+        self.DisableAvgPower = Gtk.Button(label="Disable")
+        self.DisableAvgPower.connect('clicked', self.avgPReset_clicked)
 
         self.avgPSlider = Gtk.Scale()
         self.avgPSlider.set_digits(0)  # Number of decimal places to use
         self.avgPSlider.set_range(6, 30)
-        self.avgPSlider.set_draw_value(False)  # Show a label with current value
-        self.avgPSlider.set_value(cpuparams['avgpower'])  # Sets the current value/position
+        self.avgPSlider.set_draw_value(True)  # Show a label with current value
+        self.avgPSlider.set_value(params['avgpower'])  # Sets the current value/position
         self.avgPSlider.connect('value-changed', self.avgPslider_changed)
         self.avgPSlider.set_hexpand(True)  #
 
-        self.SlidersBox.append(self.avgPlabel)
-        self.avgbox.append(self.avgPowerReset)
-        self.avgbox.append(self.avgPSlider)
-        self.SlidersBox.append(self.avgbox)
+        self.avgbox.append(self.avgbar)
+        self.avgbox.append(self.avgplabel)
+        self.avgedit.append(self.DisableAvgPower)
+        self.avgedit.append(self.avgPSlider)
+        self.avgbox.append(self.avgedit)
+        self.SlidersBox.append(self.avgframe)
 
     def initpkPower(self):
-        self.pkbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.pkbox.set_margin_bottom(15)
+        self.pkbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.pkedit = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.pkframe = Gtk.Frame()
+        self.pkframe.set_margin_top(15)
+        self.pkframe.set_margin_bottom(15)
+        self.pkframe.set_margin_end(10)
+        self.pkframe.set_child(self.pkbox)
+        self.pkplabel = Gtk.Label()
+        self.pkplabel.set_margin_top(10)
+        self.pkplabel.set_label('Peak Power Limit')
 
-        self.pkPlabel = Gtk.Label(label="Max Peak Power : " + str(cpuparams['pkpower']) + "W | enabled : " + str(cpuparams['pkPEdit']))
-        self.pkPlabel.set_margin_top(5)
 
-        self.pkPowerReset = Gtk.Button(label="Reset")
-        self.pkPowerReset.connect('clicked', self.pkPReset_clicked)
+        self.pkbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
+        self.pkbar.set_min_value(0)
+        self.pkbar.set_max_value(1)
+
+        self.DisablePkPower = Gtk.Button(label="Disable")
+        self.DisablePkPower.connect('clicked', self.pkPReset_clicked)
 
         self.pkPSlider = Gtk.Scale()
         self.pkPSlider.set_digits(0)  # Number of decimal places to use
         self.pkPSlider.set_range(8, 33)
-        self.pkPSlider.set_draw_value(False)  # Show a label with current value
-        self.pkPSlider.set_value(cpuparams['pkpower'])  # Sets the current value/position
+        self.pkPSlider.set_draw_value(True)  # Show a label with current value
+        self.pkPSlider.set_value(params['pkpower'])  # Sets the current value/position
         self.pkPSlider.connect('value-changed', self.pkPslider_changed)
         self.pkPSlider.set_hexpand(True)  #
 
-        self.SlidersBox.append(self.pkPlabel)
-        self.pkbox.append(self.pkPowerReset)
-        self.pkbox.append(self.pkPSlider)
-        self.SlidersBox.append(self.pkbox)
+        self.pkbox.append(self.pkbar)
+        self.pkbox.append(self.pkplabel)
+        self.pkedit.append(self.DisablePkPower)
+        self.pkedit.append(self.pkPSlider)
+        self.pkbox.append(self.pkedit)
+        self.SlidersBox.append(self.pkframe)
 
 
     def tempReset_clicked(self, button):
-        conn = Client(local_address, authkey=local_key)
-        conn.send(["TEMP", 0])
-        conn.close()
+        if params['tempEdit']:
+            self.conn.send(["TEMP", 0])
+        else:
+            self.conn.send(["TEMP", 1])
         sleep(0.01)
-        self.templabel.set_label("Max Temperature : " + str(cpuparams['temp']) + "C | enabled : " + str(cpuparams['tempEdit']))
     def avgPReset_clicked(self, button):
-        conn = Client(local_address, authkey=local_key)
-        conn.send(["AVGPOWER", 0])
-        conn.close()
+        if params["avgPEdit"]:
+            self.conn.send(["AVGPOWER", 0])
+        else:
+            self.conn.send(["AVGPOWER", 1])
         sleep(0.01)
-        self.avgPlabel.set_label("Max Avg Power : " +str(cpuparams['avgpower'])+"W | enabled : " +str(cpuparams['avgPEdit']))
     def pkPReset_clicked(self, button):
-        conn = Client(local_address, authkey=local_key)
-        conn.send(["PKPOWER", 0])
-        conn.close()
+        if params["pkPEdit"]:
+            self.conn.send(["PKPOWER", 0])
+        else:
+            self.conn.send(["PKPOWER", 1])
         sleep(0.01)
-        self.pkPlabel.set_label("Max Peak Power : " + str(cpuparams['pkpower']) + "W | enabled : " + str(cpuparams['pkPEdit']))
 
     def tempSlider_changed(self, slider):
         slidervalue = int(slider.get_value())
-        self.templabel.set_label("Max Temperature : " + str(slidervalue))
-        conn = Client(local_address, authkey=local_key)
-        conn.send(["TEMP", slidervalue])
-        conn.close()
+        #self.templabel.set_label("Max Temperature : " + str(slidervalue))
+        self.conn.send(["TEMP", slidervalue])
         sleep(0.01)
-        self.templabel.set_label("Max Temperature : " + str(cpuparams['temp']) + "C | enabled : " + str(cpuparams['tempEdit']))
+        #self.templabel.set_label("Max Temperature : " + str(params['temp']) + "C | enabled : " + str(params['tempEdit']))
 
     def avgPslider_changed(self, slider):
         slidervalue = int(slider.get_value())
-        self.avgPlabel.set_label("Max Avg Power : " + str(slidervalue))
-        conn = Client(local_address, authkey=local_key)
-        conn.send(["AVGPOWER", slidervalue])
-        conn.close()
+        #self.avgPlabel.set_label("Max Avg Power : " + str(slidervalue))
+        self.conn.send(["AVGPOWER", slidervalue])
         sleep(0.01)
-        self.avgPlabel.set_label("Max Avg Power : " + str(cpuparams['avgpower']) + "W | enabled : " + str(cpuparams['avgPEdit']))
+        #self.avgPlabel.set_label("Max Avg Power : " + str(params['avgpower']) + "W | enabled : " + str(params['avgPEdit']))
 
     def pkPslider_changed(self, slider):
         slidervalue = int(slider.get_value())
-        self.pkPlabel.set_label("Max Peak Power : " + str(slidervalue))
-        conn = Client(local_address, authkey=local_key)
-        conn.send(["PKPOWER", slidervalue])
-        conn.close()
+        #self.pkPlabel.set_label("Max Peak Power : " + str(slidervalue))
+        self.conn.send(["PKPOWER", slidervalue])
         sleep(0.01)
-        self.pkPlabel.set_label("Max Peak Power : " + str(cpuparams['pkpower']) + "W | enabled : " + str(cpuparams['pkPEdit']))
+        #self.pkPlabel.set_label("Max Peak Power : " + str(params['pkpower']) + "W | enabled : " + str(params['pkPEdit']))
 
 
     def Exit(self, button):
-        conn = Client(local_address, authkey=local_key)
-        conn.send("EXIT")
-        conn.close()
+        self.running = False
+        self.conn.send("EXIT")
+        self.conn.close()
 
 
 class MyApp(Adw.Application):
@@ -292,7 +369,7 @@ class CoreHandler:
                 sleep(0.1)
 
     def localServer(self):  # connection to the gui (secure)
-        global cpuparams
+        global params
         listener = Listener(local_address, authkey=local_key)
         while self.running:
             try:
@@ -306,39 +383,45 @@ class CoreHandler:
                         break
                     elif msg[0] == "TEMP":
                         if int(msg[1]) == 0:
-                            cpuparams["tempEdit"] = False
+                            params["tempEdit"] = False
+                        elif int(msg[1]) == 1:
+                            params["tempEdit"] = True
                         else :
-                            cpuparams["temp"] = int(msg[1])
-                            cpuparams["tempEdit"] = True
+                            params["temp"] = int(msg[1])
+                            #params["tempEdit"] = True
                     elif msg[0] == "AVGPOWER":
                         if int(msg[1]) == 0:
-                            cpuparams["avgPEdit"] = False
+                            params["avgPEdit"] = False
+                        elif int(msg[1]) == 1:
+                            params["avgPEdit"] = True
                         else:
-                            cpuparams["avgpower"] = int(msg[1])
-                            cpuparams["avgPEdit"] = True
+                            params["avgpower"] = int(msg[1])
+                            #params["avgPEdit"] = True
                     elif msg[0] == "PKPOWER":
                         if int(msg[1]) == 0:
-                            cpuparams["pkPEdit"] = False
+                            params["pkPEdit"] = False
+                        elif int(msg[1]) == 1:
+                            params["pkPEdit"] = True
                         else :
-                            cpuparams["pkpower"] = int(msg[1])
-                            cpuparams["pkPEdit"] = True
+                            params["pkpower"] = int(msg[1])
+                            #params["pkPEdit"] = True
             except:
                 pass
 
     def connection(self):  # connection to the daemon (secure)
-        global cpuparams
+        global params
         while self.running:
             try:
                 self.conn = Client(connAddress, authkey=bytes(key, 'ascii'))
                 while self.running:
-                    if cpuparams["tempEdit"] == True:
-                        self.conn.send(["ryzenadj", "temp", cpuparams["temp"]])
+                    if params["tempEdit"] == True:
+                        self.conn.send(["ryzenadj", "temp", params["temp"]])
                         sleep(0.2)
-                    if cpuparams["avgPEdit"] == True:
-                        self.conn.send(["ryzenadj", "avgpower", cpuparams["avgpower"] * 1000])
+                    if params["avgPEdit"] == True:
+                        self.conn.send(["ryzenadj", "avgpower", params["avgpower"] * 1000])
                         sleep(0.2)
-                    if cpuparams["pkPEdit"] == True:
-                        self.conn.send(["ryzenadj", "pkpower", cpuparams["pkpower"] * 1000])
+                    if params["pkPEdit"] == True:
+                        self.conn.send(["ryzenadj", "pkpower", params["pkpower"] * 1000])
                         sleep(0.2)
                     sleep(2)
             except:
