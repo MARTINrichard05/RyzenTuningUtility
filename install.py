@@ -2,14 +2,13 @@ from subprocess import check_output, call
 import os
 import sys
 
-version = 2
+version = 3
 user = check_output(['whoami']).decode('utf-8')[:-1]
 WorkingDirectory = os.getcwd()
 
 path = "/home/" + user + "/.var/app/com.nyaker.RyzenTuningUtility"
 desktopPath = "/home/" + user + "/.local/share/applications"
-corefilelist = [("daemon/ryzenadj/libryzenadj.so", "/daemon/ryzenadj"), ("daemon/ryzenadj/ryzenadj", "/daemon/ryzenadj"), ("daemon/RyzenTuningDaemon.py", "/daemon"),
-                ("gui/RyzenTuningUtility.py", "/gui"), ("start.py", "")]
+corefilelist = [("gui/RyzenTuningUtility.py", "/gui"), ("start.py", "")]
 configfileslist = [("daemon/config.py", "/daemon")]
 installMode = "None"
 
@@ -32,12 +31,8 @@ def selectrepair():
 
 def install_desktopShortcut():
     call(("cp", "-f", "etc/RyzenTuningController.desktop", desktopPath))
+    os.system("echo Exec=/home/" + user + "/Nextcloud/sync/dev/Python/RyzenTuningUtility/start.py >> "+desktopPath+"/RyzenTuningController.desktop")
     print("\n======= desktop files copied into " + desktopPath + " =======\n")
-
-
-def install_icon():
-    call(("pkexec", "cp", "-f", WorkingDirectory + "/etc/com.nyaker.RyzenTuningUtility.svg", "/usr/share/icons/hicolor/scalable/apps"))
-    print("\n======= Icon copied into " + "/usr/share/icons/hicolor/scalable/apps" + " =======\n")
 
 
 def install_libs():
@@ -58,6 +53,9 @@ def install_Core_Files():
         i += 1
         print((i / len(corefilelist)) * 100, "%.")
     print("\n======= core files copied into " + path + " =======\n")
+
+def install_safe_files():
+    call(("pkexec", "python",WorkingDirectory + "/etc/admin_installer.py", WorkingDirectory, path))
 
 
 def install_Configs(mode):
@@ -114,8 +112,8 @@ except:
 
 if installMode == "normal":
     install_Core_Files()
-    install_Configs()
-    install_icon()
+    install_safe_files()
+    #install_Configs("force")
     install_desktopShortcut()
     install_libs()
 elif installMode == "update":
@@ -123,8 +121,8 @@ elif installMode == "update":
     install_desktopShortcut()
 elif installMode == "repairC":
     install_Core_Files()
-    install_Configs()
-    install_icon()
+    #install_Configs("force")
+    install_safe_files()
     install_desktopShortcut()
     install_libs()
 elif installMode == "repairB":

@@ -4,6 +4,5 @@ Encoding=UTF-8
 Version=1.0
 Type=Application
 Terminal=false
-Exec=/home/richou/Nextcloud/sync/dev/Python/RyzenTuningUtility/start.py
 Name=RyzenTuningUtility
 Icon=com.nyaker.RyzenTuningUtility

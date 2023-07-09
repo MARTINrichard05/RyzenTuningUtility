@@ -355,6 +355,7 @@ class CoreHandler:
 
                             if msg == "EXIT":
                                 conn.close()
+                                self.conn.close()
                                 # self.exit()
                                 break
                             elif msg == "OPEN":
@@ -417,6 +418,9 @@ class CoreHandler:
                     if params["tempEdit"] == True:
                         self.conn.send(["ryzenadj", "temp", params["temp"]])
                         sleep(0.2)
+                        if self.conn.recv() == "EXIT":
+                            self.running = False
+                            exit(0)
                     if params["avgPEdit"] == True:
                         self.conn.send(["ryzenadj", "avgpower", params["avgpower"] * 1000])
                         sleep(0.2)

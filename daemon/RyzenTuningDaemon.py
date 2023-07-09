@@ -49,6 +49,7 @@ def main_loop():
                 running = False
             elif msg[0] == "ryzenadj":
                 decompose_and_set(msg)
+                conn.send("OK")
             elif msg == "TEST":
                 cmdout = subprocess.run([workingDir + '/ryzenadj/ryzenadj', '-h'], stdout=subprocess.PIPE).stdout.decode('utf-8').split('\n')
                 conn.send(cmdout)

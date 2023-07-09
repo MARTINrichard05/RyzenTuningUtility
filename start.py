@@ -2,19 +2,32 @@
 import sys
 from subprocess import check_output, call
 from multiprocessing import Process
-from multiprocessing.connection import Client
+from multiprocessing.connection import Client, Listener
 import os
 import random
 
-version = 2
+version = 3
 user = check_output(['whoami']).decode('utf-8')[:-1]
 path = "/home/"+user+"/.var/app/com.nyaker.RyzenTuningUtility"
 key = random.randint(0,999999999999999999)
 connAddress = ('localhost', 6001)
+address = ('localhost', 6000)
 
 
 def startDaemon():
-    call(('pkexec', python, path + '/daemon/RyzenTuningDaemon.py', str(key), user))
+    code = call(('pkexec', python, path + '/daemon/RyzenTuningDaemon.py', str(key), user))
+    if code == 126:
+        call(('zenity', '--error', '--text', 'PLEASE RESTART OR CLOSE RYZEN TUNING UTILITY (KILL DAEMON)'))
+        listener = Listener(address, authkey=bytes(str(key), 'ascii'))
+        conn = listener.accept()
+        running = True
+        while running:
+            while conn.poll():
+                msg = conn.recv()
+                if msg == "EXIT":
+                    running = False
+                else:
+                    conn.send("EXIT")
     #os.system('pkexec '+ python+ ' ' + path + '/daemon/RyzenTuningDaemon.py ' + str(key) + ' ' + user)
     #os.system('python ' + path + '/daemon/RyzenTuningDaemon.py ' + str(key))
 
@@ -53,5 +66,6 @@ except:
             gui_proc.start()
             daemon_proc.join()
             gui_proc.join()
+
 
 
