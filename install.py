@@ -119,6 +119,7 @@ if installMode == "normal":
 elif installMode == "update":
     install_Core_Files()
     install_desktopShortcut()
+    install_safe_files()
 elif installMode == "repairC":
     install_Core_Files()
     #install_Configs("force")
