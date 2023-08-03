@@ -17,7 +17,7 @@ from gi.repository import Gtk, Adw, Gio, GLib
 key = sys.argv[1]
 user = sys.argv[2]
 
-workingDir = "/home/"+user+"/.var/app/com.nyaker.RyzenTuningUtility/gui"
+workingDir = "/home/" + user + "/.var/app/com.nyaker.RyzenTuningUtility/gui"
 
 local_key = randbytes(256)  # this is the key that will be used to authenticate the connection between gui and handler
 local_address = ('localhost', 6006)
@@ -27,17 +27,45 @@ connAddress = ('localhost', 6000)  # privilidged daemon
 unsecure_address = ('localhost', 6001)
 unsecure_key = bytes('open/close', 'ascii')
 
-params = {"settings":{"temp_enabled": False, "max_temp": 75, "avg_power_enabled": False, "max_avg_power": 10, "peak_power_enabled": False, "max_peak_power": 13, "mode" : "manual"},"updated": False,}
-
-
-
+params = {"settings": {"temp_enabled": False, "max_temp": 75, "avg_power_enabled": False, "max_avg_power": 10, "peak_power_enabled": False, "max_peak_power": 13,
+                       "mode": "manual"}, "updated": False, }
 
 
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
 
+        self.conn = None
+        self.pkPSlider = None
+        self.DisablePkPower = None
+        self.pk01 = None
+        self.pkbar = None
+        self.pkplabel = None
+        self.pkframe = None
+        self.pkedit = None
+        self.pkbox = None
+        self.avgPSlider = None
+        self.DisableAvgPower = None
+        self.avg01 = None
+        self.avgbar = None
+        self.avgplabel = None
+        self.avgframe = None
+        self.avgedit = None
+        self.avgbox = None
+        self.TempSlider = None
+        self.disableTemp = None
+        self.temp01 = None
+        self.tempbar = None
+        self.templabel = None
+        self.tempframe = None
+        self.tempadj = None
+        self.tempbox = None
+        self.hamburger = None
+        self.Phamburger = None
+        self.popover = None
+        self.menu = None
+        self.presets = None
         while True:
-            try :
+            try:
                 a = params['stats']
                 break
             except:
@@ -52,14 +80,12 @@ class MainWindow(Gtk.ApplicationWindow):
         self.actions = True
         self.first = True
 
-
         self.set_default_size(600, 250)
         self.set_title("RyzenTuningUtility")
         self.connect("close-request", self.closewin)
         app = self.get_application()
         sm = app.get_style_manager()
         ## sm.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
-
 
         self.MainBox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.SlidersBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -74,7 +100,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.ExitButton = Gtk.Button(label="KILL DAEMON")
         self.ExitButton.connect('clicked', self.Exit)
-        
+
         self.initTemp()
 
         self.initavgPower()
@@ -91,7 +117,7 @@ class MainWindow(Gtk.ApplicationWindow):
         connThread.start()
         GLib.timeout_add(30, self.refresh)
 
-    def closewin(self,arg):
+    def closewin(self, arg):
         self.running = False
 
     def connF(self):
@@ -104,7 +130,7 @@ class MainWindow(Gtk.ApplicationWindow):
         global params
         if params["updated"]:
 
-            if params['settings']['temp_enabled']: # refreshing max_temp bar
+            if params['settings']['temp_enabled']:  # refreshing max_temp bar
                 self.disableTemp.set_label('Disable')
                 self.temp01.set_value(1)
 
@@ -118,8 +144,7 @@ class MainWindow(Gtk.ApplicationWindow):
             if self.tempbar.get_allocated_width() != 0 and self.tempbar.get_allocated_height() != 0:
                 self.tempbar.set_value(params['stats']['temp'])
 
-            #sleep(0.01)
-
+            # sleep(0.01)
 
             if params['settings']['max_temp'] != int(self.TempSlider.get_value()):
                 self.TempSlider.set_value(params['settings']['max_temp'])
@@ -131,13 +156,12 @@ class MainWindow(Gtk.ApplicationWindow):
                 self.DisableAvgPower.set_label('Enable')
                 self.avg01.set_value(0)
 
-
             if self.pkbar.get_allocated_width() != 0 and self.pkbar.get_allocated_height() != 0:
                 self.avgbar.set_max_value(params['stats']['max_avg_power'])
             if self.avgbar.get_allocated_width() != 0 and self.avgbar.get_allocated_height() != 0:
                 self.avgbar.set_value(params['stats']['avg_power'])
 
-            #sleep(0.01)
+            # sleep(0.01)
 
             if params['settings']['max_avg_power'] != int(self.avgPSlider.get_value()):
                 self.avgPSlider.set_value(params['settings']['max_avg_power'])
@@ -149,23 +173,22 @@ class MainWindow(Gtk.ApplicationWindow):
                 self.DisablePkPower.set_label('Enable')
                 self.pk01.set_value(0)
 
-
             if self.pkbar.get_allocated_width() != 0 and self.pkbar.get_allocated_height() != 0:
                 self.pkbar.set_max_value(params['stats']['max_peak_power'])
             if self.pkbar.get_allocated_width() != 0 and self.pkbar.get_allocated_height() != 0:
                 self.pkbar.set_value(params['stats']['peak_power'])
 
-            #sleep(0.01)
+            # sleep(0.01)
 
             if params['settings']['max_peak_power'] != int(self.pkPSlider.get_value()):
                 self.pkPSlider.set_value(params['settings']['max_peak_power'])
 
             params['updated'] = False
-        else :
+        else:
             pass
         if self.running:
             return True
-        else :
+        else:
             return False
 
     def readcfg(self):
@@ -184,20 +207,22 @@ class MainWindow(Gtk.ApplicationWindow):
         self.Pmenu = Gio.Menu.new()
         self.actions = []
         for i in self.presets:
-            self.actions.append([Gio.Menu.new(), Gio.SimpleAction.new(i+"Enable", None), Gio.SimpleAction.new(i+"Save", None), Gio.SimpleAction.new(i+"Rename", None), Gio.SimpleAction.new(i+"Delete", None)])
+            self.actions.append(
+                [Gio.Menu.new(), Gio.SimpleAction.new(i + "Enable", None), Gio.SimpleAction.new(i + "Save", None), Gio.SimpleAction.new(i + "Rename", None),
+                 Gio.SimpleAction.new(i + "Delete", None)])
 
             buff = ["Enable", "Save", "Rename", "Delete"]
-            for j in range(1,len(buff)+1):
-                self.actions[len(self.actions) - 1][j].connect("activate", self.presetchanged, (i, buff[j-1]))
+            for j in range(1, len(buff) + 1):
+                self.actions[len(self.actions) - 1][j].connect("activate", self.presetchanged, (i, buff[j - 1]))
                 self.add_action(self.actions[len(self.actions) - 1][j])
             for j in buff:
-                self.actions[len(self.actions)-1][0].append(j, "win."+i+j)
-            self.Pmenu.append_submenu(i, self.actions[len(self.actions)-1][0])
+                self.actions[len(self.actions) - 1][0].append(j, "win." + i + j)
+            self.Pmenu.append_submenu(i, self.actions[len(self.actions) - 1][0])
 
         if not self.first:
             self.menu.remove(1)
             self.menu.append_submenu("Presets", self.Pmenu)
-        else :
+        else:
             self.first = False
 
     def initPresets(self):
@@ -207,7 +232,7 @@ class MainWindow(Gtk.ApplicationWindow):
             self.presets = {}
             self.writecfg()
 
-          # Here the action is being added to the window, but you could add it to the
+        # Here the action is being added to the window, but you could add it to the
         # application or an "ActionGroup"
 
         # Create a new menu, containing that action
@@ -227,11 +252,10 @@ class MainWindow(Gtk.ApplicationWindow):
         self.popover.set_menu_model(self.menu)
 
         # Create a menu button
-        self.Phamburger = Gtk.MenuButton() # Create a new
+        self.Phamburger = Gtk.MenuButton()  # Create a new
         self.Phamburger.set_icon_name("open-menu-symbolic")
         self.reloadPmenu()
-        self.menu.append_submenu("Presets",self.Pmenu)
-
+        self.menu.append_submenu("Presets", self.Pmenu)
 
         self.hamburger = Gtk.MenuButton()
         self.hamburger.set_popover(self.popover)
@@ -257,9 +281,8 @@ class MainWindow(Gtk.ApplicationWindow):
             self.writecfg()
             self.reloadPmenu()
 
-
     def new_preset(self, action, param):
-        self.prename = str(randint(0,99999))
+        self.prename = str(randint(0, 99999))
         self.presets[self.prename] = copy.deepcopy(params['settings'])
         self.select_pname()
         pass
@@ -285,8 +308,6 @@ class MainWindow(Gtk.ApplicationWindow):
                 self.writecfg()
                 self.reloadPmenu()
 
-
-
     def initTemp(self):
         global params
         self.tempbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -307,8 +328,8 @@ class MainWindow(Gtk.ApplicationWindow):
         self.temp01.set_min_value(0)
         self.temp01.set_max_value(1)
 
-        #self.templabel = Gtk.Label(label="Max Temperature : "+str(params['settings']['max_temp'])+"C | enabled : " +str(params['settings']['temp_enabled']))
-        #self.templabel.set_margin_top(5)
+        # self.templabel = Gtk.Label(label="Max Temperature : "+str(params['settings']['max_temp'])+"C | enabled : " +str(params['settings']['temp_enabled']))
+        # self.templabel.set_margin_top(5)
 
         self.disableTemp = Gtk.Button(label="Disable")
         self.disableTemp.connect('clicked', self.tempReset_clicked)
@@ -319,7 +340,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.TempSlider.set_draw_value(True)  # Show a label with current value
         self.TempSlider.set_value(params['settings']['max_temp'])  # Sets the current value/position
         self.TempSlider.connect('value-changed', self.tempSlider_changed)
-        self.TempSlider.set_hexpand(True) #
+        self.TempSlider.set_hexpand(True)  #
 
         self.tempadj.append(self.disableTemp)
         self.tempadj.append(self.TempSlider)
@@ -379,7 +400,6 @@ class MainWindow(Gtk.ApplicationWindow):
         self.pkplabel.set_margin_top(10)
         self.pkplabel.set_label('Peak Power Limit')
 
-
         self.pkbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
         self.pkbar.set_min_value(0)
         self.pkbar.set_max_value(params['settings']['max_peak_power'])
@@ -407,19 +427,20 @@ class MainWindow(Gtk.ApplicationWindow):
         self.pkbox.append(self.pk01)
         self.SlidersBox.append(self.pkframe)
 
-
     def tempReset_clicked(self, button):
         if params['settings']['temp_enabled']:
             self.conn.send(["max_temp", 0])
         else:
             self.conn.send(["max_temp", 1])
         sleep(0.01)
+
     def avgPReset_clicked(self, button):
         if params['settings']["avg_power_enabled"]:
             self.conn.send(["max_avg_power", 0])
         else:
             self.conn.send(["max_avg_power", 1])
         sleep(0.01)
+
     def pkPReset_clicked(self, button):
         if params['settings']["peak_power_enabled"]:
             self.conn.send(["max_peak_power", 0])
@@ -429,25 +450,24 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def tempSlider_changed(self, slider):
         slidervalue = int(slider.get_value())
-        #self.templabel.set_label("Max Temperature : " + str(slidervalue))
+        # self.templabel.set_label("Max Temperature : " + str(slidervalue))
         self.conn.send(["max_temp", slidervalue])
         sleep(0.01)
-        #self.templabel.set_label("Max Temperature : " + str(params['settings']['max_temp']) + "C | enabled : " + str(params['settings']['temp_enabled']))
+        # self.templabel.set_label("Max Temperature : " + str(params['settings']['max_temp']) + "C | enabled : " + str(params['settings']['temp_enabled']))
 
     def avgPslider_changed(self, slider):
         slidervalue = int(slider.get_value())
-        #self.avgPlabel.set_label("Max Avg Power : " + str(slidervalue))
+        # self.avgPlabel.set_label("Max Avg Power : " + str(slidervalue))
         self.conn.send(["max_avg_power", slidervalue])
         sleep(0.01)
-        #self.avgPlabel.set_label("Max Avg Power : " + str(params['settings']['max_avg_power']) + "W | enabled : " + str(params['settings']['avg_power_enabled']))
+        # self.avgPlabel.set_label("Max Avg Power : " + str(params['settings']['max_avg_power']) + "W | enabled : " + str(params['settings']['avg_power_enabled']))
 
     def pkPslider_changed(self, slider):
         slidervalue = int(slider.get_value())
-        #self.pkPlabel.set_label("Max Peak Power : " + str(slidervalue))
+        # self.pkPlabel.set_label("Max Peak Power : " + str(slidervalue))
         self.conn.send(["max_peak_power", slidervalue])
         sleep(0.01)
-        #self.pkPlabel.set_label("Max Peak Power : " + str(params['settings']['max_peak_power']) + "W | enabled : " + str(params['settings']['peak_power_enabled']))
-
+        # self.pkPlabel.set_label("Max Peak Power : " + str(params['settings']['max_peak_power']) + "W | enabled : " + str(params['settings']['peak_power_enabled']))
 
     def Exit(self, button):
         self.running = False
@@ -469,9 +489,11 @@ class MyApp(Adw.Application):
 
 class CoreHandler:
     def __init__(self):
+        self.conn = None
+        self.guiapp = None
+        self.guithread = None
         self.running = True
         self.isgui = False
-
 
         self.connectionThread = Thread(target=self.connection)
         self.serverThread = Thread(target=self.server)
@@ -505,7 +527,7 @@ class CoreHandler:
 
         listener = Listener(unsecure_address, authkey=unsecure_key)
         while self.running:
-            if self.isgui == False:
+            if not self.isgui:
                 try:
                     conn = listener.accept()
                     while self.running:
@@ -520,7 +542,7 @@ class CoreHandler:
                             elif msg == "OPEN":
                                 self.initGuiThread()
                                 break
-                        if self.running == False:
+                        if not self.running:
                             break
 
                 except:
@@ -546,9 +568,9 @@ class CoreHandler:
                             params['settings']["temp_enabled"] = False
                         elif int(msg[1]) == 1:
                             params['settings']["temp_enabled"] = True
-                        else :
+                        else:
                             params['settings']["max_temp"] = int(msg[1])
-                            #params['settings']["temp_enabled"] = True
+                            # params['settings']["temp_enabled"] = True
                     elif msg[0] == "max_avg_power":
                         if int(msg[1]) == 0:
                             params['settings']["avg_power_enabled"] = False
@@ -556,15 +578,15 @@ class CoreHandler:
                             params['settings']["avg_power_enabled"] = True
                         else:
                             params['settings']["max_avg_power"] = int(msg[1])
-                            #params['settings']["avg_power_enabled"] = True
+                            # params['settings']["avg_power_enabled"] = True
                     elif msg[0] == "max_peak_power":
                         if int(msg[1]) == 0:
                             params['settings']["peak_power_enabled"] = False
                         elif int(msg[1]) == 1:
                             params['settings']["peak_power_enabled"] = True
-                        else :
+                        else:
                             params['settings']["max_peak_power"] = int(msg[1])
-                            #params['settings']["peak_power_enabled"] = True
+                            # params['settings']["peak_power_enabled"] = True
             except:
                 pass
 
@@ -582,7 +604,7 @@ class CoreHandler:
                         if params['settings']["temp_enabled"] == True:
                             self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
                             sleep(0.01)
-                            #if self.conn.recv() == "EXIT":
+                            # if self.conn.recv() == "EXIT":
                             #    self.running = False
                             #    exit(0)
                         if params['settings']["avg_power_enabled"] == True:
@@ -592,7 +614,7 @@ class CoreHandler:
                             self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"] * 1000])
                             sleep(0.01)
                     if self.isgui and not params["updated"]:
-                        self.conn.send(['get','all'])
+                        self.conn.send(['get', 'all'])
                         params['stats'] = self.conn.recv()
                         params["updated"] = True
 
