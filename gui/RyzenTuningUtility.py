@@ -268,7 +268,12 @@ class MainWindow(Gtk.ApplicationWindow):
         global params
         if preset_name[1] == "Enable":
             if preset_name[0] in self.presets:
-                params = copy.deepcopy(self.presets[preset_name[0]])
+                if 'updated' in self.presets[preset_name[0]]:
+                    params = copy.deepcopy(self.presets[preset_name[0]])
+                else :
+                    self.presets[preset_name[0]]['updated'] = False
+                    self.writecfg()
+                    params = copy.deepcopy(self.presets[preset_name[0]])
         elif preset_name[1] == "Save":
             if preset_name[0] in self.presets:
                 if params["mode"] == "manual":

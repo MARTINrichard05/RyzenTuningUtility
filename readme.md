@@ -27,4 +27,4 @@ if you close it by just pressing the arrow , it will still run in background, to
 click on "kill daemon" button then close the window
 
 ## current state
-Usable, more functions and fixes are comming
+WORKING ON A HOTFIX FOR PRESETS USE V2 instead
