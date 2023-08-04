@@ -9,6 +9,8 @@ You can use it even if you don't really know what you are doing there is not tha
 
 It is not made to overclock the cpu or anything like that, just to change some common setting to get desired performance and noise (fan)
 
+You can join my discord to get all the latest news https://discord.gg/vHnM2vt5hu 
+
 ## install
 # requirements
 `python` `pip`    
