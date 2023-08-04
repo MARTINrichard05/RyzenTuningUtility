@@ -23,7 +23,7 @@ def getraw(value):
             rawoutput = (line.split(" "))
 
     if rawoutput is None:
-        return None
+        return 1
 
     for i in range(len(rawoutput)-1):
         if rawoutput[i] == "":

@@ -2,7 +2,7 @@ from subprocess import check_output, call
 import os
 import sys
 
-version = 4
+version = 5
 user = check_output(['whoami']).decode('utf-8')[:-1]
 WorkingDirectory = os.getcwd()
 
@@ -27,7 +27,9 @@ def selectrepair():
         print("Basic repair, your config data is safe")
         installMode = "repairB"
 
-
+def install_icon():
+    call(("pkexec", "cp", "-f", WorkingDirectory+"/etc/com.nyaker.RyzenTuningUtility.svg", "/usr/share/icons/hicolor/scalable/apps"))
+    print("\n======= Icon copied into " + "/usr/share/icons/hicolor/scalable/apps" + " =======\n")
 
 def install_desktopShortcut():
     call(("cp", "-f", "etc/RyzenTuningController.desktop", desktopPath))
@@ -115,17 +117,20 @@ if installMode == "normal":
     install_safe_files()
     #install_Configs("force")
     install_desktopShortcut()
+    install_icon()
     install_libs()
 elif installMode == "update":
     install_Core_Files()
     install_desktopShortcut()
     install_safe_files()
+    install_icon()
 elif installMode == "repairC":
     install_Core_Files()
     #install_Configs("force")
     install_safe_files()
     install_desktopShortcut()
     install_libs()
+    install_icon()
 elif installMode == "repairB":
     install_Core_Files()
     install_desktopShortcut()
