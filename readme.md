@@ -27,5 +27,5 @@ if you close it by just pressing the arrow , it will still run in background, to
 click on "kill daemon" button then close the window
 
 ## current state
-Fixed Presets
+Fixed no icon in the launcher  
 I d'ont have anyone for testing, if you find any issue, please report it , it would help me so much !!
