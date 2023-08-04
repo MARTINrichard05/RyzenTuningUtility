@@ -28,3 +28,4 @@ click on "kill daemon" button then close the window
 
 ## current state
 Fixed Presets
+I d'ont have anyone for testing, if you find any issue, please report it , it would help me so much !!
