@@ -600,20 +600,23 @@ class CoreHandler:
                 params['stats'] = self.conn.recv()
                 i = 0
                 while self.running:
-                    if i >= 40:
+                    if i >= 15:
                         i = 0
                         if params['settings']["temp_enabled"] == True:
-                            self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
-                            sleep(0.01)
+                            if int(params['settings']["max_temp"]) != int(params['stats']["max_temp"]):
+                                self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
+                                sleep(0.01)
                             # if self.conn.recv() == "EXIT":
                             #    self.running = False
                             #    exit(0)
                         if params['settings']["avg_power_enabled"] == True:
-                            self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"] * 1000])
-                            sleep(0.01)
+                            if int(params['settings']["max_avg_power"]) != int(params['stats']["max_avg_power"]):
+                                self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"] * 1000])
+                                sleep(0.01)
                         if params['settings']["peak_power_enabled"] == True:
-                            self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"] * 1000])
-                            sleep(0.01)
+                            if int(params['settings']["max_peak_power"]) != int(params['stats']["max_peak_power"]):
+                                self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"] * 1000])
+                                sleep(0.01)
                     if self.isgui and not params["updated"]:
                         self.conn.send(['get', 'all'])
                         params['stats'] = self.conn.recv()
