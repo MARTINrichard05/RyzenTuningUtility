@@ -13,10 +13,15 @@ address = ('localhost', 6000)
 
 listener = Listener(address, authkey=bytes(key, 'ascii'))
 
+backupvals = {}
+
 def getraw(value):
 
     rawoutput = None
-    cmdout = subprocess.check_output(['ryzenadj', '-i']).decode('utf-8').split('\n')
+    try:
+        cmdout = subprocess.check_output(['ryzenadj', '-i']).decode('utf-8').split('\n')
+    except:
+        return backupvals[value]
 
     for line in cmdout:
         if value in line:
@@ -30,6 +35,7 @@ def getraw(value):
             pass
         else:
             try:
+                backupvals[value] = float(rawoutput[i])
                 return float(rawoutput[i])
             except :
                 pass
@@ -68,7 +74,10 @@ def decompose_and_set(msg):
             elif msg[i] > 95:
                 pass
             else:
-                subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-f", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                try:
+                    subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-f", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                except:
+                    pass
         elif msg[i] == "max_avg_power":
             i += 1
             if msg[i] < 6000:
@@ -76,11 +85,17 @@ def decompose_and_set(msg):
             elif msg[i] > 30000:
                 pass
             else:
-                subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-a", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-c", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                try:
+                    subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-a", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                    subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-c", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                except:
+                    pass
         elif msg[i] == "max_peak_power":
             i += 1
-            subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-b", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+            try:
+                subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-b", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+            except:
+                pass
 
 
 def main_loop():

@@ -64,6 +64,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.popover = None
         self.menu = None
         self.presets = None
+
         while True:
             try:
                 a = params['stats']
