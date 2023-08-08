@@ -599,7 +599,21 @@ class CoreHandler:
                 self.conn.send(['get', 'all'])
                 params['stats'] = self.conn.recv()
                 i = 0
+                j = 0
                 while self.running:
+                    if self.isgui and not params["updated"]:
+                        self.conn.send(['get', 'all'])
+                        params['stats'] = self.conn.recv()
+                        params["updated"] = True
+                    elif not self.isgui:
+                        if j >= 15:
+                            j = 0
+                            self.conn.send(['get', 'all'])
+                            params['stats'] = self.conn.recv()
+                            params["updated"] = True
+                        else :
+                            j += 1
+
                     if i >= 15:
                         i = 0
                         if params['settings']["temp_enabled"] == True:
@@ -617,10 +631,7 @@ class CoreHandler:
                             if int(params['settings']["max_peak_power"]) != int(params['stats']["max_peak_power"]):
                                 self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"] * 1000])
                                 sleep(0.01)
-                    if self.isgui and not params["updated"]:
-                        self.conn.send(['get', 'all'])
-                        params['stats'] = self.conn.recv()
-                        params["updated"] = True
+
 
                     i += 1
                     sleep(0.01)
