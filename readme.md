@@ -1,8 +1,8 @@
 ### Ryzen Tuning Utility
 
 <img src="screens/1.png">  
-<img src="screens/2.png">  
-### WARINIG
+<img src="screens/2.png">     
+### Warning
 I CURRENTLY FOUND A SEVERE PRIVILEDGE ESCALATION TECHNIQUE THAT CAN BE TRIGGERED BY MODIFYING THE START.PY FILE.  
 PLUS, THEVERSIONS WITH BATTERY OPTIMISATIONS MAKE MY PC CRASH.   
 ONE THIS MESSAGE WILL BE GONE,AT LEAST THE SEC FLAW WILL BE FIXED.
@@ -34,4 +34,4 @@ click on "kill daemon" button then close the window
 
 ## current state
 Fixed no icon in the launcher  
-I d'ont have anyone for testing, if you find any issue, please report it , it would help me so much !!
+I d'ont have anyone for testing, if you find any issue, please report it , it would help me so much 
