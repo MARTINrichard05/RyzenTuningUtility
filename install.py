@@ -33,7 +33,7 @@ def install_icon():
 
 def install_desktopShortcut():
     call(("cp", "-f", "etc/RyzenTuningController.desktop", desktopPath))
-    os.system("echo Exec=/home/" + user + "/Nextcloud/sync/dev/Python/RyzenTuningUtility/start.py >> "+desktopPath+"/RyzenTuningController.desktop")
+    os.system("echo Exec=/home/" + user + "/.var/app/com.nyaker.RyzenTuningUtility/start.py >> "+desktopPath+"/RyzenTuningController.desktop")
     print("\n======= desktop files copied into " + desktopPath + " =======\n")
 
 
