@@ -619,6 +619,7 @@ class CoreHandler:
                         i = 0
                         if params['settings']["temp_enabled"] == True:
                             if int(params['settings']["max_temp"]) != int(oldparams["max_temp"]) :
+                                oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_temp"]) != int(params['stats']["max_temp"]):
@@ -630,6 +631,7 @@ class CoreHandler:
                             #    exit(0)
                         if params['settings']["avg_power_enabled"] == True:
                             if int(params['settings']["max_avg_power"]) != int(oldparams["max_avg_power"]) :
+                                oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_avg_power"]) != int(params['stats']["max_avg_power"]):
@@ -638,6 +640,7 @@ class CoreHandler:
                                 sleep(0.01)
                         if params['settings']["peak_power_enabled"] == True:
                             if int(params['settings']["max_avg_power"]) != int(oldparams["max_avg_power"]) :
+                                oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_peak_power"]) != int(params['stats']["max_peak_power"]):
