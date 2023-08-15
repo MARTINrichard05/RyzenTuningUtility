@@ -2,6 +2,10 @@
 
 <img src="screens/1.png">  
 <img src="screens/2.png">  
+## #WARINIG
+I CURRENTLY FOUND A SEVERE PRIVILEDGE ESCALATION TECHNIQUE THAT CAN BE TRIGGERED BY MODIFYING THE START.PY FILE.  
+PLUS, THEVERSIONS WITH BATTERY OPTIMISATIONS MAKE MY PC CRASH.   
+ONE THIS MESSAGE WILL BE GONE,AT LEAST THE SEC FLAW WILL BE FIXED.
 
 ## about
 A little program that allow you to easily tune your Ryzen's settings.    
