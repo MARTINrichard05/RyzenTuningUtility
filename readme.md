@@ -17,12 +17,16 @@ You can join my discord to get all the latest news https://discord.gg/vHnM2vt5hu
 
 ## install
 # requirements
-`python` `pip`    
-a ryzen cpu compatible with ryzenadj  
-a up-to-date linux distro
+`python` `pip` `gtk4` `libadwaita`    
+a ryzen cpu compatible with ryzenadj
+working ryzenadj install , to be sure ryzenadj works : `ryzenadj -i`
+up-to-date linux distro
+`iomem=relaxed` in boot parameters 
 
 run `install.sh` as user
 it will ask you for privileges if needed
+
+if an error appears on modules install, install `pyGobject` yoursel and it should work !
 
 ## using
 just click on the icon in your app menu (first time install it will need to refresh, if it don't appear after 30 secs log out and in)

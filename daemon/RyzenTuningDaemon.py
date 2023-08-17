@@ -82,7 +82,7 @@ def decompose_and_set(msg):
             i += 1
             if msg[i] < 6000:
                 pass
-            elif msg[i] > 30000:
+            elif msg[i] > 60000:
                 pass
             else:
                 try:

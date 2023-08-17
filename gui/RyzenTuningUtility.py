@@ -375,7 +375,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.avgPSlider = Gtk.Scale()
         self.avgPSlider.set_digits(0)  # Number of decimal places to use
-        self.avgPSlider.set_range(6, 30)
+        self.avgPSlider.set_range(7, 60)
         self.avgPSlider.set_draw_value(True)  # Show a label with current value
         self.avgPSlider.set_value(params['settings']['max_avg_power'])  # Sets the current value/position
         self.avgPSlider.connect('value-changed', self.avgPslider_changed)
@@ -414,7 +414,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.pkPSlider = Gtk.Scale()
         self.pkPSlider.set_digits(0)  # Number of decimal places to use
-        self.pkPSlider.set_range(8, 33)
+        self.pkPSlider.set_range(9, 70)
         self.pkPSlider.set_draw_value(True)  # Show a label with current value
         self.pkPSlider.set_value(params['settings']['max_peak_power'])  # Sets the current value/position
         self.pkPSlider.connect('value-changed', self.pkPslider_changed)

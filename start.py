@@ -6,7 +6,7 @@ from multiprocessing.connection import Client, Listener
 import os
 import random
 
-version = 8
+version = 9
 testMode = False
 user = check_output(['whoami']).decode('utf-8')[:-1]
 path = "/home/"+user+"/.var/app/com.nyaker.RyzenTuningUtility"

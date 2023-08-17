@@ -2,7 +2,7 @@ from subprocess import check_output, call
 import os
 import sys
 
-version = 8
+version = 9
 user = check_output(['whoami']).decode('utf-8')[:-1]
 WorkingDirectory = os.getcwd()
 
