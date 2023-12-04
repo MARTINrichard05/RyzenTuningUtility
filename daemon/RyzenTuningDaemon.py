@@ -19,7 +19,7 @@ def getraw(value):
 
     rawoutput = None
     try:
-        cmdout = subprocess.check_output(['ryzenadj', '-i']).decode('utf-8').split('\n')
+        cmdout = subprocess.check_output([workingDir+'/ryzenadj/ryzenadj', '-i']).decode('utf-8').split('\n')
     except:
         return backupvals[value]
 
