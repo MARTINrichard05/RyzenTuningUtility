@@ -12,6 +12,7 @@ It is not made to overclock the cpu or anything like that, just to change some c
 You can join my discord to get all the latest news https://discord.gg/vHnM2vt5hu 
 
 ## install
+until 3.5 release, clone the latest source for critical fixes.
 # requirements
 `python` `pip` `gtk4` `libadwaita`    
 a ryzen cpu compatible with ryzenadj
