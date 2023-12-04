@@ -8,7 +8,7 @@ WorkingDirectory = os.getcwd()
 
 path = "/home/" + user + "/.var/app/com.nyaker.RyzenTuningUtility"
 desktopPath = "/home/" + user + "/.local/share/applications"
-corefilelist = [("gui/RyzenTuningUtility.py", "/gui"), ("start.py", "")]
+corefilelist = [("gui/RyzenTuningUtility.py", "/gui"), ]
 configfileslist = [("daemon/config.py", "/daemon")]
 installMode = "None"
 

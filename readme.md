@@ -3,10 +3,6 @@
 <img src="screens/1.png">  
 <img src="screens/2.png">     
 
-### Warning
-I CURRENTLY FOUND A SEVERE PRIVILEDGE ESCALATION TECHNIQUE THAT CAN BE TRIGGERED BY MODIFYING THE START.PY FILE.
-ONE THIS MESSAGE WILL BE GONE,AT LEAST THE SEC FLAW WILL BE FIXED.
-
 ## about
 A little program that allow you to easily tune your Ryzen's settings.    
 You can use it even if you don't really know what you are doing there is not that much of a risk of damaging the cpu because i d'ont allow to modify critical settings
