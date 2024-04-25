@@ -18,17 +18,18 @@ The ui will improve a bit too.
 A little program that allow you to easily tune your Ryzen's settings.    
 You can use it even if you don't really know what you are doing there is not that much of a risk of damaging the cpu because i d'ont allow to modify critical settings
 
-It is not made to overclock the cpu or anything like that, just to change some common setting to get desired performance and noise (fan)
+It is not made to overclock the cpu , just to change some common setting to get desired performance and noise (fan). It can greatly improve performance on battery but decrease battery life.
 
 
 ## install
 until 3.5 release, clone the latest source for critical fixes.
 # requirements
 `python` `pip` `gtk4` `libadwaita`    
-a ryzen cpu compatible with ryzenadj
-working ryzenadj install , to be sure ryzenadj works : `ryzenadj -i`
-up-to-date linux distro
-`iomem=relaxed` in boot parameters 
+a ryzen cpu compatible with ryzenadj   
+working ryzenadj install , to be sure ryzenadj works : `ryzenadj -i`   
+up-to-date linux distro   
+`iomem=relaxed` in boot parameters if ryzen adj don't work   
+if you have secure boot, use the unlockdown module https://github.com/blastrock/unlockdown
 
 run `install.sh` as user
 it will ask you for privileges if needed
@@ -46,3 +47,8 @@ click on "kill daemon" button then close the window
 ## current state
 Fixed no icon in the launcher  
 I d'ont have anyone for testing, if you find any issue, please report it , it would help me so much 
+
+## Thanks to
+- https://github.com/FlyGoat for ryzenadj
+- https://github.com/blastrock for unlockdown
+- https://github.com for student pack and copilot access (copilot i used, but i always double check to be sure)
