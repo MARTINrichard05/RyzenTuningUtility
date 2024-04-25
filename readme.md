@@ -1,7 +1,18 @@
 ### Ryzen Tuning Utility
 
 <img src="screens/1.png">  
-<img src="screens/2.png">     
+<img src="screens/2.png">    
+
+## I am working again on it
+I am working on new features such as :
+- secure boot support, for now, i have found a module to disable it temporarily, but i am open to a more "safe" solution (maybe adding an exeption).   
+- skin temp limit support because, as i have seen, this tends to limit my performance over time (gaming).   
+- auto detect , to test the maximum allowed values for your cpu instead of "hardcoding" them, making it more user friendly.
+- stapm surveillance, to see if the cpu is throttling for any reason.
+- ryzenadj installer, to fix dependency issues if you are using a debian based distro with older packets, and, make it available for the system
+
+All of this by keeping the app accessible to anyone, even if you don't know what you are doing.
+The ui will improve a bit too.
 
 ## about
 A little program that allow you to easily tune your Ryzen's settings.    
@@ -9,7 +20,6 @@ You can use it even if you don't really know what you are doing there is not tha
 
 It is not made to overclock the cpu or anything like that, just to change some common setting to get desired performance and noise (fan)
 
-You can join my discord to get all the latest news https://discord.gg/vHnM2vt5hu 
 
 ## install
 until 3.5 release, clone the latest source for critical fixes.

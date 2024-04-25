@@ -47,6 +47,8 @@ def getVal(value):
                 "max_avg_power": int(getraw("PPT LIMIT SLOW")),
                 "peak_power": float(getraw("PPT VALUE FAST")),
                 "max_peak_power": int(getraw("PPT LIMIT FAST")),
+                "max_skin_temp": float(getraw("STAPM LIMIT")),
+                "skin_temp": float(getraw("STAPM VALUE")),
                 }
     elif value == "temp":
         return getraw("THM VALUE CORE")
@@ -60,6 +62,10 @@ def getVal(value):
         return getraw("PPT LIMIT FAST")
     elif value == "max_peak_power":
         return getraw("PPT LIMIT FAST")
+    elif value == "skin_temp_limit":
+        return getraw("STAPM LIMIT")
+    elif value == "skin_temp":
+        return getraw("STAPM VALUE")
     else:
         return None
 
@@ -69,33 +75,48 @@ def decompose_and_set(msg):
             pass
         elif msg[i] == "max_temp":
             i += 1
-            if msg[i] < 55:
-                pass
-            elif msg[i] > 95:
-                pass
-            else:
-                try:
-                    subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-f", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                except:
+            if type(msg[i]) == int:
+                if msg[i] < 55:
                     pass
+                elif msg[i] > 95:
+                    pass
+                else:
+                    try:
+                        subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-f", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                    except:
+                        pass
         elif msg[i] == "max_avg_power":
             i += 1
-            if msg[i] < 6000:
-                pass
-            elif msg[i] > 60000:
-                pass
-            else:
-                try:
-                    subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-a", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                    subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-c", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                except:
+            if type(msg[i]) == int:
+                if msg[i] < 6000:
                     pass
+                elif msg[i] > 60000:
+                    pass
+                else:
+                    try:
+                        subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-a", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                        subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-c", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                    except:
+                        pass
         elif msg[i] == "max_peak_power":
             i += 1
-            try:
-                subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-b", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-            except:
-                pass
+            if type(msg[i]) == int:
+                try:
+                    subprocess.call([workingDir + '/ryzenadj/ryzenadj', "-b", str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                except:
+                    pass
+        elif msg[i] == "max_skin_temp":
+            i += 1
+            if type(msg[i]) == int:
+                if msg[i] < 55:
+                    pass
+                elif msg[i] > 95:
+                    pass
+                else:
+                    try:
+                        subprocess.call([workingDir + '/ryzenadj/ryzenadj', "--apu-skin-temp="+str(msg[i])], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+                    except:
+                        pass
 
 
 def main_loop():
