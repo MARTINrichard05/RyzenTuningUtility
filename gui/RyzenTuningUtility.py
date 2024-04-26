@@ -765,7 +765,7 @@ class CoreHandler:
                             elif int(params['settings']["max_skin_temp"]) != int(params['stats']["max_skin_temp"]):
                                 #print("target skin temp limit not equal to current limit")
                                 #print("target : " + str(params['settings']["max_skin_temp"]) + " current : " + str(
-                                    params['stats']["max_skin_temp"]))
+                                #    #params['stats']["max_skin_temp"]))
                                 skin_temp_cnt += 1
                                 sleep(0.5)
                                 self.conn.send(["set", "max_skin_temp", params['settings']["max_skin_temp"]])
