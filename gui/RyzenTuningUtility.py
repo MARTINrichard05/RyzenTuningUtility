@@ -719,12 +719,12 @@ class CoreHandler:
                         i = 0
                         if params['settings']["temp_enabled"] == True:
                             if int(params['settings']["max_temp"]) != int(oldparams["max_temp"]):
-                                print("user changed temp")
+                                #print("user changed temp")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_temp"]) != int(params['stats']["max_temp"]):
-                                print("target temp limit not equal to current limit")
+                                #print("target temp limit not equal to current limit")
                                 coretemp_cnt += 1
                                 sleep(0.5)
                                 self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
@@ -734,37 +734,37 @@ class CoreHandler:
                             #    exit(0)
                         if params['settings']["avg_power_enabled"] == True:
                             if int(params['settings']["max_avg_power"]) != int(oldparams["max_avg_power"]):
-                                print("user changed avg power")
+                                #print("user changed avg power")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_avg_power"]) != int(params['stats']["max_avg_power"]):
-                                print("target avg power limit not equal to current limit")
+                                #print("target avg power limit not equal to current limit")
                                 avgpower_cnt += 1
                                 sleep(0.5)
                                 self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"] * 1000])
                                 sleep(0.01)
                         if params['settings']["peak_power_enabled"] == True:
                             if int(params['settings']["max_peak_power"]) != int(oldparams["max_peak_power"]):
-                                print("user changed peak power")
+                                #print("user changed peak power")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_peak_power"]) != int(params['stats']["max_peak_power"]):
-                                print("target peak power limit not equal to current limit")
+                                #print("target peak power limit not equal to current limit")
                                 peakpower_cnt += 1
                                 sleep(0.5)
                                 self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"] * 1000])
                                 sleep(0.01)
                         if params['settings']["skin_temp_enabled"] == True:
                             if int(params['settings']["max_skin_temp"]) != int(oldparams["max_skin_temp"]):
-                                print("user changed skin temp")
+                                #print("user changed skin temp")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_skin_temp", params['settings']["max_skin_temp"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_skin_temp"]) != int(params['stats']["max_skin_temp"]):
-                                print("target skin temp limit not equal to current limit")
-                                print("target : " + str(params['settings']["max_skin_temp"]) + " current : " + str(
+                                #print("target skin temp limit not equal to current limit")
+                                #print("target : " + str(params['settings']["max_skin_temp"]) + " current : " + str(
                                     params['stats']["max_skin_temp"]))
                                 skin_temp_cnt += 1
                                 sleep(0.5)
