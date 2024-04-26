@@ -2,7 +2,7 @@ from subprocess import check_output, call
 import os
 import sys
 
-version = 9
+version = 11
 user = check_output(['whoami']).decode('utf-8')[:-1]
 WorkingDirectory = os.getcwd()
 
@@ -126,11 +126,11 @@ elif installMode == "update":
     install_icon()
 elif installMode == "repairC":
     install_Core_Files()
-    #install_Configs("force")
+    install_Configs("force")
     install_safe_files()
-    install_desktopShortcut()
-    install_libs()
-    install_icon()
+    # install_desktopShortcut()
+    # install_libs()
+    # install_icon()
 elif installMode == "repairB":
     install_Core_Files()
     install_desktopShortcut()

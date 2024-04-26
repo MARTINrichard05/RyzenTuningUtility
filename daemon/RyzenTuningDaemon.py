@@ -40,6 +40,8 @@ def getraw(value):
             except :
                 pass
 def getVal(value):
+
+
     if value == "all":
         return {"temp" : float(getraw("THM VALUE CORE")),
                 "max_temp": int(getraw("THM LIMIT CORE")),
@@ -47,8 +49,8 @@ def getVal(value):
                 "max_avg_power": int(getraw("PPT LIMIT SLOW")),
                 "peak_power": float(getraw("PPT VALUE FAST")),
                 "max_peak_power": int(getraw("PPT LIMIT FAST")),
-                "max_skin_temp": float(getraw("STAPM LIMIT")),
-                "skin_temp": float(getraw("STAPM VALUE")),
+                "max_skin_temp": float(getraw("STT LIMIT APU")),
+                "skin_temp": float(getraw("STT VALUE APU")),
                 }
     elif value == "temp":
         return getraw("THM VALUE CORE")
