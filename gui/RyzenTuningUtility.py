@@ -22,7 +22,7 @@ workingDir = "/home/" + user + "/.var/app/com.nyaker.RyzenTuningUtility/gui"
 local_key = randbytes(256)  # this is the key that will be used to authenticate the connection between gui and handler
 local_address = ('localhost', 6006)
 
-connAddress = ('localhost', 6000)  # privilidged daemon
+connAddress = ('localhost', 6000)  # privileged daemon
 
 unsecure_address = ('localhost', 6001)
 unsecure_key = bytes('open/close', 'ascii')
@@ -38,47 +38,13 @@ class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
 
         self.conn = None
-        self.pkPSlider = None
-        self.DisablePkPower = None
-        self.pk01 = None
-        self.pkbar = None
-        self.pkplabel = None
-        self.pkframe = None
-        self.pkedit = None
-        self.pkbox = None
-
-        self.avgPSlider = None
-        self.DisableAvgPower = None
-        self.avg01 = None
-        self.avgbar = None
-        self.avgplabel = None
-        self.avgframe = None
-        self.avgedit = None
-        self.avgbox = None
-
-        self.TempSlider = None
-        self.disableTemp = None
-        self.temp01 = None
-        self.tempbar = None
-        self.templabel = None
-        self.tempframe = None
-        self.tempadj = None
-        self.tempbox = None
-
-        self.stempSlider = None
-        self.disablestemp = None
-        self.stemp01 = None
-        self.stempbar = None
-        self.stemplabel = None
-        self.stempframe = None
-        self.stempadj = None
-        self.stembox = None
 
         self.hamburger = None
         self.Phamburger = None
         self.popover = None
         self.menu = None
         self.presets = None
+        self.ui_elements = {}
 
         while True:
             try:
@@ -99,9 +65,9 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_default_size(600, 250)
         self.set_title("RyzenTuningUtility")
         self.connect("close-request", self.closewin)
-        app = self.get_application()
-        sm = app.get_style_manager()
-        ## sm.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
+        # app = self.get_application()
+        # sm = app.get_style_manager()
+        # # sm.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
 
         self.MainBox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.SlidersBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -117,28 +83,28 @@ class MainWindow(Gtk.ApplicationWindow):
         self.ExitButton = Gtk.Button(label="KILL DAEMON")
         self.ExitButton.connect('clicked', self.Exit)
 
-        self.initTemp()
+        self.inittemp()
 
-        self.initSTemp()
+        self.initstemp()
 
-        self.initavgPower()
+        self.initavgpower()
 
-        self.initpkPower()
+        self.initpkpower()
 
-        self.initPresets()
+        self.initpresets()
 
         self.set_child(self.MainBox)
         self.header.pack_start(self.ExitButton)
         self.MainBox.append(self.SlidersBox)
 
-        connThread = Thread(target=self.connF)
-        connThread.start()
+        connthread = Thread(target=self.conn_f)
+        connthread.start()
         GLib.timeout_add(30, self.refresh)
 
     def closewin(self, arg):
         self.running = False
 
-    def connF(self):
+    def conn_f(self):
         self.conn = Client(local_address, authkey=local_key)
         while self.running:
             sleep(0.1)
@@ -147,72 +113,25 @@ class MainWindow(Gtk.ApplicationWindow):
     def refresh(self):
         global params
         if params["updated"]:
+            settings = [("temp_enabled", "max_temp", "temp"), ("skin_temp_enabled", "max_skin_temp", "skin_temp"),
+                        ("avg_power_enabled", "max_avg_power", "avg_power"),
+                        ("peak_power_enabled", "max_peak_power", "peak_power")]
 
-            if params['settings']['temp_enabled']:  # refreshing max_temp bar
-                self.disableTemp.set_label('Disable')
-                self.temp01.set_value(1)
+            for setting_enabled, setting_max, stat in settings:
+                if params['settings'][setting_enabled]:
+                    self.ui_elements[setting_max]['disablebutton'].set_label('Disable')
+                    self.ui_elements[setting_max]['bar01'].set_value(1)
+                else:
+                    self.ui_elements[setting_max]['disablebutton'].set_label('Enable')
+                    self.ui_elements[setting_max]['bar01'].set_value(0)
 
-            else:
-                self.disableTemp.set_label('Enable')
-                self.temp01.set_value(0)
+                if self.ui_elements[setting_max]['bar'].get_allocated_width() != 0 and self.ui_elements[setting_max][
+                    'bar'].get_allocated_height() != 0:
+                    self.ui_elements[setting_max]['bar'].set_max_value(params['stats'][setting_max])
+                    self.ui_elements[setting_max]['bar'].set_value(params['stats'][stat])
 
-            if self.tempbar.get_allocated_width() != 0 and self.tempbar.get_allocated_height() != 0:
-                self.tempbar.set_max_value(params['stats']['max_temp'])
-                self.tempbar.set_value(params['stats']['temp'])
-
-            # sleep(0.01)
-
-            if params['settings']['max_temp'] != int(self.TempSlider.get_value()):
-                self.TempSlider.set_value(params['settings']['max_temp'])
-
-            if params['settings']["avg_power_enabled"]:
-                self.DisableAvgPower.set_label('Disable')
-                self.avg01.set_value(1)
-            else:
-                self.DisableAvgPower.set_label('Enable')
-                self.avg01.set_value(0)
-
-            if self.pkbar.get_allocated_width() != 0 and self.pkbar.get_allocated_height() != 0:
-                self.avgbar.set_max_value(params['stats']['max_avg_power'])
-                self.avgbar.set_value(params['stats']['avg_power'])
-
-            # sleep(0.01)
-
-            if params['settings']['max_avg_power'] != int(self.avgPSlider.get_value()):
-                self.avgPSlider.set_value(params['settings']['max_avg_power'])
-
-            if params['settings']["peak_power_enabled"]:
-                self.DisablePkPower.set_label('Disable')
-                self.pk01.set_value(1)
-            else:
-                self.DisablePkPower.set_label('Enable')
-                self.pk01.set_value(0)
-
-            if self.pkbar.get_allocated_width() != 0 and self.pkbar.get_allocated_height() != 0:
-                self.pkbar.set_max_value(params['stats']['max_peak_power'])
-                self.pkbar.set_value(params['stats']['peak_power'])
-
-            # sleep(0.01)
-
-            if params['settings']['max_peak_power'] != int(self.pkPSlider.get_value()):
-                self.pkPSlider.set_value(params['settings']['max_peak_power'])
-
-            if params['settings']['skin_temp_enabled']:  # refreshing max_temp bar
-                self.disablestemp.set_label('Disable')
-                self.stemp01.set_value(1)
-
-            else:
-                self.disablestemp.set_label('Enable')
-                self.stemp01.set_value(0)
-
-            if self.stempbar.get_allocated_width() != 0 and self.stempbar.get_allocated_height() != 0:
-                self.stempbar.set_max_value(params['stats']['max_skin_temp'])
-                self.stempbar.set_value(params['stats']['skin_temp'])
-
-            # sleep(0.01)
-
-            if params['settings']['max_skin_temp'] != int(self.sTempSlider.get_value()):
-                self.sTempSlider.set_value(params['settings']['max_skin_temp'])
+                if params['settings'][setting_max] != int(self.ui_elements[setting_max]['slider'].get_value()):
+                    self.ui_elements[setting_max]['slider'].set_value(params['settings'][stat])
 
             params['updated'] = False
         else:
@@ -230,7 +149,7 @@ class MainWindow(Gtk.ApplicationWindow):
         with open(workingDir + '/presets.json', 'w') as fp:
             json.dump(self.presets, fp)
 
-    def reloadPmenu(self):
+    def reloadpmenu(self):
         if self.Pmenu:
             del self.Pmenu
         if self.actions:
@@ -257,7 +176,7 @@ class MainWindow(Gtk.ApplicationWindow):
         else:
             self.first = False
 
-    def initPresets(self):
+    def initpresets(self):
         try:
             self.readcfg()
         except:
@@ -269,9 +188,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
         # Create a new menu, containing that action
 
-        NewPreset = Gio.SimpleAction.new("new_preset", None)
-        NewPreset.connect("activate", self.new_preset)
-        self.add_action(NewPreset)  # Here the action is being added to the window, but you could add it to the
+        new_preset = Gio.SimpleAction.new("new_preset", None)
+        new_preset.connect("activate", self.new_preset)
+        self.add_action(new_preset)  # Here the action is being added to the window, but you could add it to the
         # application or an "ActionGroup"
 
         # Create a new menu, containing that action
@@ -286,7 +205,7 @@ class MainWindow(Gtk.ApplicationWindow):
         # Create a menu button
         self.Phamburger = Gtk.MenuButton()  # Create a new
         self.Phamburger.set_icon_name("open-menu-symbolic")
-        self.reloadPmenu()
+        self.reloadpmenu()
         self.menu.append_submenu("Presets", self.Pmenu)
 
         self.hamburger = Gtk.MenuButton()
@@ -297,209 +216,128 @@ class MainWindow(Gtk.ApplicationWindow):
         self.header.pack_start(self.hamburger)
 
     def select_pname(self):
+        """asks the user to rename the preset"""
         entry = Gtk.Entry()
-        entry.connect("activate", self.on_entry_activated)
-        self.MainBox.append(entry)
+        entry.connect("activate", self.rename_preset)  # when the user presses enter
+        self.MainBox.append(entry)  # add the entry to the window
 
-    def on_entry_activated(self, entry):
+    def rename_preset(self, entry):
+        """when the user presses enter, rename the preset"""
         newkey = entry.get_text()
         if ' ' in newkey:
             newkey = newkey.replace(' ', '_')
         self.MainBox.remove(entry)
+
         if newkey != self.prename[0]:
             self.presets[newkey] = self.presets[self.prename]
             del self.presets[self.prename]
             self.MainBox.remove(entry)
             self.writecfg()
-            self.reloadPmenu()
+            self.reloadpmenu()
 
     def new_preset(self, action, param):
+        """creates a new preset with the current settings"""
         self.prename = str(randint(0, 99999))
         self.presets[self.prename] = copy.deepcopy(params['settings'])
-        self.select_pname()
+        self.select_pname()  # ask the user to rename the preset
         pass
 
     def presetchanged(self, action, param, preset_name):
+        """handles action with presets, enable, save, rename, delete"""
         global params
-        if preset_name[1] == "Enable":
-            if preset_name[0] in self.presets:
-                params['settings'] = copy.deepcopy(self.presets[preset_name[0]])
-        elif preset_name[1] == "Save":
-            if preset_name[0] in self.presets:
+        preset, action = preset_name[0], preset_name[1]
+        if action == "Enable":
+            if preset in self.presets:
+                for i in self.presets[preset]:  # safe and ensure compatibility with older config files
+                    params['settings'][i] = self.presets[preset][i]
+                params['updated'] = True
+
+        elif action == "Save":
+            if preset in self.presets:
                 if params['settings']["mode"] == "manual":
-                    self.presets[preset_name[0]] = copy.deepcopy(params['settings'])
+                    self.presets[preset] = copy.deepcopy(params['settings'])
                     self.writecfg()
-                    self.reloadPmenu()
-        elif preset_name[1] == "Rename":
-            if preset_name[0] in self.presets:
-                self.prename = preset_name[0]
+                    self.reloadpmenu()
+
+        elif action == "Rename":
+            if preset in self.presets:
+                self.prename = preset
                 self.select_pname()
-        elif preset_name[1] == "Delete":
-            if preset_name[0] in self.presets:
-                del self.presets[preset_name[0]]
+
+        elif action == "Delete":
+            if preset in self.presets:
+                del self.presets[preset]
                 self.writecfg()
-                self.reloadPmenu()
+                self.reloadpmenu()
 
-    def initTemp(self):
+    def initslider(self, label_text, slider_range, slider_value, reset_callback, slider_callback, key_text):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        adj = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        frame = Gtk.Frame()
+        frame.set_margin_top(15)
+        frame.set_margin_end(10)
+        frame.set_child(box)
+        plabel = Gtk.Label()
+        plabel.set_margin_top(10)
+        plabel.set_label(label_text)
+
+        bar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
+        bar.set_min_value(0)
+        bar.set_max_value(100)
+
+        bar01 = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
+        bar01.set_min_value(0)
+        bar01.set_max_value(1)
+
+        disablebutton = Gtk.Button(label="Disable")
+        disablebutton.connect('clicked', reset_callback)
+
+        slider = Gtk.Scale()
+        slider.set_digits(0)  # Number of decimal places to use
+        slider.set_range(*slider_range)
+        slider.set_draw_value(True)  # Show a label with current value
+        slider.set_value(slider_value)  # Sets the current value/position
+        slider.connect('value-changed', slider_callback)
+        slider.set_hexpand(True)  #
+
+        adj.append(disablebutton)
+        adj.append(slider)
+        box.append(bar)
+        box.append(plabel)
+        box.append(adj)
+        box.append(bar01)
+        self.SlidersBox.append(frame)
+
+        # Store the UI elements in the self.ui_elements dictionary
+        self.ui_elements[key_text] = {
+            'box': box,
+            'adj': adj,
+            'frame': frame,
+            'plabel': plabel,
+            'bar': bar,
+            'bar01': bar01,
+            'disablebutton': disablebutton,
+            'slider': slider
+        }
+
+    def inittemp(self):
         global params
-        self.tempbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.tempadj = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.tempframe = Gtk.Frame()
-        self.tempframe.set_margin_top(15)
-        self.tempframe.set_margin_end(10)
-        self.tempframe.set_child(self.tempbox)
-        self.templabel = Gtk.Label()
-        self.templabel.set_margin_top(10)
-        self.templabel.set_label("Maximum temperature")
+        self.initslider("Maximum temperature", (55, 97), params['settings']['max_temp'], self.tempReset_clicked,
+                        self.tempSlider_changed, "max_temp")
 
-        self.tempbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.tempbar.set_min_value(0)
-        self.tempbar.set_max_value(100)
-
-        self.temp01 = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.temp01.set_min_value(0)
-        self.temp01.set_max_value(1)
-
-        # self.templabel = Gtk.Label(label="Max Temperature : "+str(params['settings']['max_temp'])+"C | enabled : " +str(params['settings']['temp_enabled']))
-        # self.templabel.set_margin_top(5)
-
-        self.disableTemp = Gtk.Button(label="Disable")
-        self.disableTemp.connect('clicked', self.tempReset_clicked)
-
-        self.TempSlider = Gtk.Scale()
-        self.TempSlider.set_digits(0)  # Number of decimal places to use
-        self.TempSlider.set_range(55, 97)
-        self.TempSlider.set_draw_value(True)  # Show a label with current value
-        self.TempSlider.set_value(params['settings']['max_temp'])  # Sets the current value/position
-        self.TempSlider.connect('value-changed', self.tempSlider_changed)
-        self.TempSlider.set_hexpand(True)  #
-
-        self.tempadj.append(self.disableTemp)
-        self.tempadj.append(self.TempSlider)
-        self.tempbox.append(self.tempbar)
-        self.tempbox.append(self.templabel)
-        self.tempbox.append(self.tempadj)
-        self.tempbox.append(self.temp01)
-        self.SlidersBox.append(self.tempframe)
-
-    def initSTemp(self):
+    def initstemp(self):
         global params
-        self.stempbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.stempadj = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.stempframe = Gtk.Frame()
-        self.stempframe.set_margin_top(15)
-        self.stempframe.set_margin_end(10)
-        self.stempframe.set_child(self.stempbox)
-        self.stemplabel = Gtk.Label()
-        self.stemplabel.set_margin_top(10)
-        self.stemplabel.set_label("Maximum Skin Temperature")
+        self.initslider("Maximum Skin Temperature", (40, params['limits']['skin_temp']),
+                        params['settings']['max_skin_temp'], self.stempReset_clicked, self.stempSlider_changed,
+                        "max_skin_temp")
 
-        self.stempbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.stempbar.set_min_value(0)
-        self.stempbar.set_max_value(100)
+    def initavgpower(self):
+        self.initslider('Average Power Limit', (7, 60), params['settings']['max_avg_power'], self.avgPReset_clicked,
+                        self.avgPslider_changed, "max_avg_power")
 
-        self.stemp01 = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.stemp01.set_min_value(0)
-        self.stemp01.set_max_value(1)
-
-        # self.templabel = Gtk.Label(label="Max Temperature : "+str(params['settings']['max_temp'])+"C | enabled : " +str(params['settings']['temp_enabled']))
-        # self.templabel.set_margin_top(5)
-
-        self.disablestemp = Gtk.Button(label="Disable")
-        self.disablestemp.connect('clicked', self.stempReset_clicked)
-
-        self.sTempSlider = Gtk.Scale()
-        self.sTempSlider.set_digits(0)  # Number of decimal places to use
-        self.sTempSlider.set_range(40, params['limits']['skin_temp'])
-        self.sTempSlider.set_draw_value(True)  # Show a label with current value
-        self.sTempSlider.set_value(params['settings']['max_skin_temp'])  # Sets the current value/position
-        self.sTempSlider.connect('value-changed', self.stempSlider_changed)
-        self.sTempSlider.set_hexpand(True)  #
-
-        self.stempadj.append(self.disablestemp)
-        self.stempadj.append(self.sTempSlider)
-        self.stempbox.append(self.stempbar)
-        self.stempbox.append(self.stemplabel)
-        self.stempbox.append(self.stempadj)
-        self.stempbox.append(self.stemp01)
-        self.SlidersBox.append(self.stempframe)
-
-    def initavgPower(self):
-        self.avgbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.avgedit = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.avgframe = Gtk.Frame()
-        self.avgframe.set_margin_top(15)
-        self.avgframe.set_margin_end(10)
-        self.avgframe.set_child(self.avgbox)
-        self.avgplabel = Gtk.Label()
-        self.avgplabel.set_margin_top(10)
-        self.avgplabel.set_label('Average Power Limit')
-
-        self.avgbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.avgbar.set_min_value(0)
-        self.avgbar.set_max_value(params['settings']['max_avg_power'])
-
-        self.avg01 = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.avg01.set_min_value(0)
-        self.avg01.set_max_value(1)
-
-        self.DisableAvgPower = Gtk.Button(label="Disable")
-        self.DisableAvgPower.connect('clicked', self.avgPReset_clicked)
-
-        self.avgPSlider = Gtk.Scale()
-        self.avgPSlider.set_digits(0)  # Number of decimal places to use
-        self.avgPSlider.set_range(7, 60)
-        self.avgPSlider.set_draw_value(True)  # Show a label with current value
-        self.avgPSlider.set_value(params['settings']['max_avg_power'])  # Sets the current value/position
-        self.avgPSlider.connect('value-changed', self.avgPslider_changed)
-        self.avgPSlider.set_hexpand(True)  #
-
-        self.avgbox.append(self.avgbar)
-        self.avgbox.append(self.avgplabel)
-        self.avgedit.append(self.DisableAvgPower)
-        self.avgedit.append(self.avgPSlider)
-        self.avgbox.append(self.avgedit)
-        self.avgbox.append(self.avg01)
-        self.SlidersBox.append(self.avgframe)
-
-    def initpkPower(self):
-        self.pkbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.pkedit = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.pkframe = Gtk.Frame()
-        self.pkframe.set_margin_top(15)
-        self.pkframe.set_margin_bottom(15)
-        self.pkframe.set_margin_end(10)
-        self.pkframe.set_child(self.pkbox)
-        self.pkplabel = Gtk.Label()
-        self.pkplabel.set_margin_top(10)
-        self.pkplabel.set_label('Peak Power Limit')
-
-        self.pkbar = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.pkbar.set_min_value(0)
-        self.pkbar.set_max_value(params['settings']['max_peak_power'])
-
-        self.pk01 = Gtk.LevelBar(orientation=Gtk.Orientation.HORIZONTAL)
-        self.pk01.set_min_value(0)
-        self.pk01.set_max_value(1)
-
-        self.DisablePkPower = Gtk.Button(label="Disable")
-        self.DisablePkPower.connect('clicked', self.pkPReset_clicked)
-
-        self.pkPSlider = Gtk.Scale()
-        self.pkPSlider.set_digits(0)  # Number of decimal places to use
-        self.pkPSlider.set_range(9, 70)
-        self.pkPSlider.set_draw_value(True)  # Show a label with current value
-        self.pkPSlider.set_value(params['settings']['max_peak_power'])  # Sets the current value/position
-        self.pkPSlider.connect('value-changed', self.pkPslider_changed)
-        self.pkPSlider.set_hexpand(True)  #
-
-        self.pkbox.append(self.pkbar)
-        self.pkbox.append(self.pkplabel)
-        self.pkedit.append(self.DisablePkPower)
-        self.pkedit.append(self.pkPSlider)
-        self.pkbox.append(self.pkedit)
-        self.pkbox.append(self.pk01)
-        self.SlidersBox.append(self.pkframe)
+    def initpkpower(self):
+        self.initslider('Peak Power Limit', (9, 70), params['settings']['max_peak_power'], self.pkPReset_clicked,
+                        self.pkPslider_changed, "max_peak_power")
 
     def tempReset_clicked(self, button):
         if params['settings']['temp_enabled']:
@@ -534,28 +372,32 @@ class MainWindow(Gtk.ApplicationWindow):
         # self.templabel.set_label("Max Temperature : " + str(slidervalue))
         self.conn.send(["max_temp", slidervalue])
         sleep(0.01)
-        # self.templabel.set_label("Max Temperature : " + str(params['settings']['max_temp']) + "C | enabled : " + str(params['settings']['temp_enabled']))
+        # self.templabel.set_label("Max Temperature : " + str(params['settings']['max_temp']) + "C | enabled : " +
+        # str(params['settings']['temp_enabled']))
 
     def avgPslider_changed(self, slider):
         slidervalue = int(slider.get_value())
         # self.avgPlabel.set_label("Max Avg Power : " + str(slidervalue))
         self.conn.send(["max_avg_power", slidervalue])
         sleep(0.01)
-        # self.avgPlabel.set_label("Max Avg Power : " + str(params['settings']['max_avg_power']) + "W | enabled : " + str(params['settings']['avg_power_enabled']))
+        # self.avgPlabel.set_label("Max Avg Power : " + str(params['settings']['max_avg_power']) + "W | enabled : " +
+        # str(params['settings']['avg_power_enabled']))
 
     def pkPslider_changed(self, slider):
         slidervalue = int(slider.get_value())
         # self.pkPlabel.set_label("Max Peak Power : " + str(slidervalue))
         self.conn.send(["max_peak_power", slidervalue])
         sleep(0.01)
-        # self.pkPlabel.set_label("Max Peak Power : " + str(params['settings']['max_peak_power']) + "W | enabled : " + str(params['settings']['peak_power_enabled']))
+        # self.pkPlabel.set_label("Max Peak Power : " + str(params['settings']['max_peak_power']) + "W | enabled : "
+        # + str(params['settings']['peak_power_enabled']))
 
     def stempSlider_changed(self, slider):
         slidervalue = int(slider.get_value())
         # self.stemplabel.set_label("Max Skin Temperature : " + str(slidervalue))
         self.conn.send(["max_skin_temp", slidervalue])
         sleep(0.01)
-        # self.stemplabel.set_label("Max Skin Temperature : " + str(params['settings']['max_skin_temp']) + "C | enabled : " + str(params['settings']['skin_temp_enabled']))
+        # self.stemplabel.set_label("Max Skin Temperature : " + str(params['settings']['max_skin_temp']) + "C |
+        # enabled : " + str(params['settings']['skin_temp_enabled']))
 
     def Exit(self, button):
         self.running = False
@@ -586,7 +428,8 @@ class CoreHandler:
 
         self.connectionThread = Thread(target=self.connection)
         self.serverThread = Thread(target=self.server)
-        self.localServerThread = Thread(target=self.localServer)  # initing some threads that are gonna run continuously
+        self.localServerThread = Thread(target=self.localServer)  # initing some threads that are going to run
+        # continuously
 
     def initGuiThread(self):  # isolate it into a function so any other code can run it (unsecure server)
         self.guithread = Thread(target=self.startGui)
@@ -604,7 +447,7 @@ class CoreHandler:
         self.serverThread.start()  # server for unsecure connection to the start process
         self.localServerThread.start()  # server for secure connection to the gui
 
-        sleep(0.1)
+        sleep(0.01)
         self.initGuiThread()
 
         self.localServerThread.join()
@@ -637,7 +480,7 @@ class CoreHandler:
                 except:
                     pass
             else:
-                sleep(0.1)
+                sleep(0.01)
 
     def localServer(self):  # connection to the gui (secure)
         global params
@@ -688,10 +531,6 @@ class CoreHandler:
 
     def connection(self):  # connection to the daemon (secure)
         global params
-        coretemp_cnt = 0  # if any of theses values goes above 3, we consider that the cpu cannot go higher
-        avgpower_cnt = 0
-        peakpower_cnt = 0
-        skin_temp_cnt = 0
 
         while self.running:
             try:
@@ -701,11 +540,13 @@ class CoreHandler:
                 i = 0
                 j = 0
                 oldparams = copy.deepcopy(params['settings'])
+
                 while self.running:
                     if self.isgui and not params["updated"]:
                         self.conn.send(['get', 'all'])
                         params['stats'] = self.conn.recv()
                         params["updated"] = True
+
                     elif not self.isgui:
                         if j >= 15:
                             j = 0
@@ -717,65 +558,58 @@ class CoreHandler:
 
                     if i >= 15:
                         i = 0
-                        if params['settings']["temp_enabled"] == True:
+                        if params['settings']["temp_enabled"]:
                             if int(params['settings']["max_temp"]) != int(oldparams["max_temp"]):
-                                #print("user changed temp")
+                                # print("user changed temp")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
                                 sleep(0.01)
+
                             elif int(params['settings']["max_temp"]) != int(params['stats']["max_temp"]):
-                                #print("target temp limit not equal to current limit")
-                                coretemp_cnt += 1
-                                sleep(0.5)
+                                # print("target temp limit not equal to current limit")
+                                sleep(0.1)
                                 self.conn.send(["set", "max_temp", params['settings']["max_temp"]])
                                 sleep(0.01)
-                            # if self.conn.recv() == "EXIT":
-                            #    self.running = False
-                            #    exit(0)
-                        if params['settings']["avg_power_enabled"] == True:
+
+                        if params['settings']["avg_power_enabled"]:
                             if int(params['settings']["max_avg_power"]) != int(oldparams["max_avg_power"]):
-                                #print("user changed avg power")
+                                # print("user changed avg power")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_avg_power"]) != int(params['stats']["max_avg_power"]):
-                                #print("target avg power limit not equal to current limit")
-                                avgpower_cnt += 1
-                                sleep(0.5)
+                                # print("target avg power limit not equal to current limit")
+                                sleep(0.1)
                                 self.conn.send(["set", "max_avg_power", params['settings']["max_avg_power"] * 1000])
                                 sleep(0.01)
-                        if params['settings']["peak_power_enabled"] == True:
+
+                        if params['settings']["peak_power_enabled"]:
                             if int(params['settings']["max_peak_power"]) != int(oldparams["max_peak_power"]):
-                                #print("user changed peak power")
+                                # print("user changed peak power")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_peak_power"]) != int(params['stats']["max_peak_power"]):
-                                #print("target peak power limit not equal to current limit")
-                                peakpower_cnt += 1
-                                sleep(0.5)
+                                # print("target peak power limit not equal to current limit")
+                                sleep(0.1)
                                 self.conn.send(["set", "max_peak_power", params['settings']["max_peak_power"] * 1000])
                                 sleep(0.01)
-                        if params['settings']["skin_temp_enabled"] == True:
+
+                        if params['settings']["skin_temp_enabled"]:
                             if int(params['settings']["max_skin_temp"]) != int(oldparams["max_skin_temp"]):
-                                #print("user changed skin temp")
+                                # print("user changed skin temp")
                                 oldparams = copy.deepcopy(params['settings'])
                                 self.conn.send(["set", "max_skin_temp", params['settings']["max_skin_temp"]])
                                 sleep(0.01)
                             elif int(params['settings']["max_skin_temp"]) != int(params['stats']["max_skin_temp"]):
-                                #print("target skin temp limit not equal to current limit")
-                                #print("target : " + str(params['settings']["max_skin_temp"]) + " current : " + str(
-                                #    #params['stats']["max_skin_temp"]))
-                                skin_temp_cnt += 1
-                                sleep(0.5)
+                                sleep(0.1)
                                 self.conn.send(["set", "max_skin_temp", params['settings']["max_skin_temp"]])
                                 sleep(0.01)
 
                     i += 1
                     sleep(0.01)
-            except Exception as e:
-                print(e)
-                sleep(0.1)
+            except :
+                sleep(0.01)
 
 
 # app = MyApp(application_id="com.example.GtkApplication")
