@@ -3,10 +3,11 @@
 <img src="screens/1.png">  
 <img src="screens/2.png">    
 
-## I am working again on it
-I am working on new features such as :
-- secure boot support, for now, i have found a module to disable it temporarily, but i am open to a more "safe" solution (maybe adding an exeption).   
-- [DONE]skin temp limit support because, as i have seen, this tends to limit my performance over time (gaming).   
+## I am working on a new version, it will be called RyzenTuner, complete rewrite
+It will still be in python but my skills improved a lot since i started this project, so it will be more efficient and more user friendly.
+These features will be in ryzen tuning utility 2 :
+- secure boot support, for now, i have found a module to disable it temporarily, but i am open to a more "safe" solution (maybe adding an exeption or something).   
+- [DONE]skin temp limit support because, as i have seen, this tends to limit my performance over time (gaming) (clone the repo to get it).   
 - auto detect , to test the maximum allowed values for your cpu instead of "hardcoding" them, making it more user friendly.
 - stapm surveillance, to see if the cpu is throttling for any reason.
 - ryzenadj installer, to fix dependency issues if you are using a debian based distro with older packets, and, make it available for the system

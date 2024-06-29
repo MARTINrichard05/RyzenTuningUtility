@@ -16,6 +16,9 @@ from gi.repository import Gtk, Adw, Gio, GLib
 
 key = sys.argv[1]
 user = sys.argv[2]
+verbose = int(sys.argv[3])
+
+print("Verbose mode :", verbose)
 
 workingDir = "/home/" + user + "/.var/app/com.nyaker.RyzenTuningUtility/gui"
 
@@ -33,12 +36,21 @@ params = {"settings": {"temp_enabled": False, "max_temp": 80, "skin_temp_enabled
                        "mode": "manual"}, "updated": False,
           "limits": {"temp": 90, "avg_power": 500, "peak_power": 1000, "skin_temp": 90}}
 
+def logg(msg,cat):
+    '''cat 0 : full running log, cat 1 : info, 2 : warning, 3 : error, 4 : debug'''
+    if verbose != "0":
+        if cat == 0:
+            print(str(msg))
+        if cat > 0 and cat < 5:
+            cats = ["INFO", "WARNING", "ERROR", "DEBUG"]
+            if cat >= verbose:
+                print("["+cats[cat-1]+"] : "+str(msg))
 
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
 
+        logg("Starting GUI, INIT",1)
         self.conn = None
-
         self.hamburger = None
         self.Phamburger = None
         self.popover = None
@@ -96,21 +108,30 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_child(self.MainBox)
         self.header.pack_start(self.ExitButton)
         self.MainBox.append(self.SlidersBox)
+        logg("gui init almost done",0)
 
         connthread = Thread(target=self.conn_f)
         connthread.start()
-        GLib.timeout_add(30, self.refresh)
+        logg("Connection thread started",0)
+        self.timeout_id = GLib.timeout_add(30, self.refresh)
+        logg("gui init finished",1)
 
     def closewin(self, arg):
+        logg("Closing Window",1)
+        GLib.source_remove(self.timeout_id)
         self.running = False
 
     def conn_f(self):
+        logg("Starting connection thread",1)
         self.conn = Client(local_address, authkey=local_key)
+        logg("Connection thread started",0)
         while self.running:
-            sleep(0.1)
+            sleep(0.3)
         self.conn.close()
+        logg("Connection thread stopped",0)
 
     def refresh(self):
+        logg("Refreshing",0)
         global params
         if params["updated"]:
             settings = [("temp_enabled", "max_temp", "temp"), ("skin_temp_enabled", "max_skin_temp", "skin_temp"),
@@ -142,18 +163,24 @@ class MainWindow(Gtk.ApplicationWindow):
             return False
 
     def readcfg(self):
+        logg("Reading presets",1)
         with open(workingDir + '/presets.json') as json_file:
             self.presets = json.load(json_file)
 
     def writecfg(self):
+        logg("Writing presets",1)
         with open(workingDir + '/presets.json', 'w') as fp:
             json.dump(self.presets, fp)
 
     def reloadpmenu(self):
+        logg("Reloading preset menu",1)
         if self.Pmenu:
             del self.Pmenu
+            logg("Preset menu deleted",0)
         if self.actions:
             del self.actions
+            logg("Actions deleted",0)
+
         self.Pmenu = Gio.Menu.new()
         self.actions = []
         for i in self.presets:
@@ -175,35 +202,29 @@ class MainWindow(Gtk.ApplicationWindow):
             self.menu.append_submenu("Presets", self.Pmenu)
         else:
             self.first = False
-
+        logg("Preset menu reloaded",1)
     def initpresets(self):
+        logg("Initing presets",1)
         try:
             self.readcfg()
         except:
             self.presets = {}
             self.writecfg()
 
-        # Here the action is being added to the window, but you could add it to the
-        # application or an "ActionGroup"
-
-        # Create a new menu, containing that action
 
         new_preset = Gio.SimpleAction.new("new_preset", None)
         new_preset.connect("activate", self.new_preset)
-        self.add_action(new_preset)  # Here the action is being added to the window, but you could add it to the
-        # application or an "ActionGroup"
+        self.add_action(new_preset)
 
-        # Create a new menu, containing that action
         self.menu = Gio.Menu.new()
         self.menu.append("new preset", "win.new_preset")
-        # action to the application
 
-        # Create a popover
-        self.popover = Gtk.PopoverMenu()  # Create a new popover menu
+
+        self.popover = Gtk.PopoverMenu()
         self.popover.set_menu_model(self.menu)
 
-        # Create a menu button
-        self.Phamburger = Gtk.MenuButton()  # Create a new
+
+        self.Phamburger = Gtk.MenuButton()
         self.Phamburger.set_icon_name("open-menu-symbolic")
         self.reloadpmenu()
         self.menu.append_submenu("Presets", self.Pmenu)
@@ -214,15 +235,18 @@ class MainWindow(Gtk.ApplicationWindow):
 
         # Add menu button to the header bar
         self.header.pack_start(self.hamburger)
+        logg("Presets inited",1)
 
     def select_pname(self):
         """asks the user to rename the preset"""
+        logg("Selecting preset name",0)
         entry = Gtk.Entry()
         entry.connect("activate", self.rename_preset)  # when the user presses enter
         self.MainBox.append(entry)  # add the entry to the window
 
     def rename_preset(self, entry):
         """when the user presses enter, rename the preset"""
+        logg("Renaming preset",0)
         newkey = entry.get_text()
         if ' ' in newkey:
             newkey = newkey.replace(' ', '_')
@@ -237,6 +261,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def new_preset(self, action, param):
         """creates a new preset with the current settings"""
+        logg("Creating new preset",1)
         self.prename = str(randint(0, 99999))
         self.presets[self.prename] = copy.deepcopy(params['settings'])
         self.select_pname()  # ask the user to rename the preset
@@ -244,33 +269,47 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def presetchanged(self, action, param, preset_name):
         """handles action with presets, enable, save, rename, delete"""
+        logg("Preset changing",1)
         global params
         preset, action = preset_name[0], preset_name[1]
         if action == "Enable":
+            logg("Enabling preset",1)
             if preset in self.presets:
                 for i in self.presets[preset]:  # safe and ensure compatibility with older config files
                     params['settings'][i] = self.presets[preset][i]
                 params['updated'] = True
+            else:
+                logg("Preset not found",2)
 
         elif action == "Save":
+            logg("Saving preset",1)
             if preset in self.presets:
                 if params['settings']["mode"] == "manual":
                     self.presets[preset] = copy.deepcopy(params['settings'])
                     self.writecfg()
                     self.reloadpmenu()
+            else:
+                logg("Preset not found",2)
 
         elif action == "Rename":
+            logg("Renaming preset",1)
             if preset in self.presets:
                 self.prename = preset
                 self.select_pname()
+            else:
+                logg("Preset not found",2)
 
         elif action == "Delete":
+            logg("Deleting preset",1)
             if preset in self.presets:
                 del self.presets[preset]
                 self.writecfg()
                 self.reloadpmenu()
+            else:
+                logg("Preset not found",2)
 
     def initslider(self, label_text, slider_range, slider_value, reset_callback, slider_callback, key_text):
+        logg("Initing slider :"+str(label_text),1)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         adj = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         frame = Gtk.Frame()
@@ -319,27 +358,33 @@ class MainWindow(Gtk.ApplicationWindow):
             'disablebutton': disablebutton,
             'slider': slider
         }
+        logg("Slider inited :"+str(self.ui_elements[key_text]),0)
 
     def inittemp(self):
+        logg("Initing temp",1)
         global params
         self.initslider("Maximum temperature", (55, 97), params['settings']['max_temp'], self.tempReset_clicked,
                         self.tempSlider_changed, "max_temp")
 
     def initstemp(self):
+        logg("Initing skin temp",1)
         global params
         self.initslider("Maximum Skin Temperature", (40, params['limits']['skin_temp']),
                         params['settings']['max_skin_temp'], self.stempReset_clicked, self.stempSlider_changed,
                         "max_skin_temp")
 
     def initavgpower(self):
+        logg("Initing avg power",1)
         self.initslider('Average Power Limit', (7, 60), params['settings']['max_avg_power'], self.avgPReset_clicked,
                         self.avgPslider_changed, "max_avg_power")
 
     def initpkpower(self):
+        logg("Initing peak power",1)
         self.initslider('Peak Power Limit', (9, 70), params['settings']['max_peak_power'], self.pkPReset_clicked,
                         self.pkPslider_changed, "max_peak_power")
 
     def tempReset_clicked(self, button):
+        logg("Temp reset clicked",1)
         if params['settings']['temp_enabled']:
             self.conn.send(["max_temp", 0])
         else:
@@ -347,6 +392,7 @@ class MainWindow(Gtk.ApplicationWindow):
         sleep(0.01)
 
     def stempReset_clicked(self, button):
+        logg("Skin temp reset clicked",1)
         if params['settings']['skin_temp_enabled']:
             self.conn.send(["max_skin_temp", 0])
         else:
@@ -354,6 +400,7 @@ class MainWindow(Gtk.ApplicationWindow):
         sleep(0.01)
 
     def avgPReset_clicked(self, button):
+        logg("Avg power reset clicked",1)
         if params['settings']["avg_power_enabled"]:
             self.conn.send(["max_avg_power", 0])
         else:
@@ -361,6 +408,7 @@ class MainWindow(Gtk.ApplicationWindow):
         sleep(0.01)
 
     def pkPReset_clicked(self, button):
+        logg("Peak power reset clicked",1)
         if params['settings']["peak_power_enabled"]:
             self.conn.send(["max_peak_power", 0])
         else:
@@ -368,6 +416,7 @@ class MainWindow(Gtk.ApplicationWindow):
         sleep(0.01)
 
     def tempSlider_changed(self, slider):
+        logg("Temp slider changed",0)
         slidervalue = int(slider.get_value())
         # self.templabel.set_label("Max Temperature : " + str(slidervalue))
         self.conn.send(["max_temp", slidervalue])
@@ -376,6 +425,7 @@ class MainWindow(Gtk.ApplicationWindow):
         # str(params['settings']['temp_enabled']))
 
     def avgPslider_changed(self, slider):
+        logg("Avg power slider changed",0)
         slidervalue = int(slider.get_value())
         # self.avgPlabel.set_label("Max Avg Power : " + str(slidervalue))
         self.conn.send(["max_avg_power", slidervalue])
@@ -384,6 +434,7 @@ class MainWindow(Gtk.ApplicationWindow):
         # str(params['settings']['avg_power_enabled']))
 
     def pkPslider_changed(self, slider):
+        logg("Peak power slider changed",0)
         slidervalue = int(slider.get_value())
         # self.pkPlabel.set_label("Max Peak Power : " + str(slidervalue))
         self.conn.send(["max_peak_power", slidervalue])
@@ -392,6 +443,7 @@ class MainWindow(Gtk.ApplicationWindow):
         # + str(params['settings']['peak_power_enabled']))
 
     def stempSlider_changed(self, slider):
+        logg("Skin temp slider changed",0)
         slidervalue = int(slider.get_value())
         # self.stemplabel.set_label("Max Skin Temperature : " + str(slidervalue))
         self.conn.send(["max_skin_temp", slidervalue])
@@ -400,6 +452,7 @@ class MainWindow(Gtk.ApplicationWindow):
         # enabled : " + str(params['settings']['skin_temp_enabled']))
 
     def Exit(self, button):
+        logg("Killing Daemon",1)
         self.running = False
         self.conn.send("EXIT")
         self.conn.close()
@@ -412,9 +465,13 @@ class MyApp(Adw.Application):
         self.win = None
 
     def on_activate(self, app):
+        logg("App activated",1)
         if not self.win:
+            logg("Creating window",0)
             self.win = MainWindow(application=app)
+        logg("Presenting window",0)
         self.win.present()
+        logg("Window presented",1)
 
 
 class CoreHandler:
@@ -430,18 +487,24 @@ class CoreHandler:
         self.serverThread = Thread(target=self.server)
         self.localServerThread = Thread(target=self.localServer)  # initing some threads that are going to run
         # continuously
+        logg('Frontend init finished',1)
 
     def initGuiThread(self):  # isolate it into a function so any other code can run it (unsecure server)
+        logg("-----FrontEnd GUI Starting------",1)
         self.guithread = Thread(target=self.startGui)
         self.guithread.start()
 
     def startGui(self):
+        logg("-----FrontEnd GUI Starting------",1)
         self.isgui = True
         self.guiapp = MyApp(application_id="com.nyaker.RyzenTuningUtility")
         self.guiapp.run()
+        self.guiapp.quit()
         self.isgui = False
+        logg('-----FrontEnd GUI Stopped------',1)
 
     def run(self):
+        logg("-----FrontEnd Starting------",1)
         self.connectionThread.start()  # init connection to the priviledged daemon
 
         self.serverThread.start()  # server for unsecure connection to the start process
@@ -455,11 +518,14 @@ class CoreHandler:
         self.connectionThread.join()
 
     def server(self):  # connection to the start process (unsecure)
+        logg("-----FrontEnd Unsecure Server Starting------",1)
         sleep(0.2)
 
         listener = Listener(unsecure_address, authkey=unsecure_key)
         while self.running:
             if not self.isgui:
+
+                logg("Open for wake request",1)
                 try:
                     conn = listener.accept()
                     while self.running:
@@ -469,29 +535,39 @@ class CoreHandler:
                             if msg == "EXIT":
                                 conn.close()
                                 self.conn.close()
+                                logg("-----Gui Thread Stopping-----",1)
                                 # self.exit()
                                 break
                             elif msg == "OPEN":
+                                logg("REQUESTED OPEN",0)
                                 self.initGuiThread()
+                                logg("-----Gui Thread Launching-----",1)
                                 break
                         if not self.running:
                             break
 
-                except:
+                except Exception as e:
+                    logg("Error in unsecure server",3)
+                    logg(e,3)
                     pass
             else:
-                sleep(0.01)
+                logg("Gui is running : " + str(self.isgui),0)
+                sleep(0.1)
 
     def localServer(self):  # connection to the gui (secure)
         global params
         listener = Listener(local_address, authkey=local_key)
         while self.running:
             try:
+                logg("Local GUI server open",0)
                 conn = listener.accept()
+                logg("Local GUI server open and connected",1)
                 while self.running:
                     msg = conn.recv()
                     if msg == "EXIT":
+                        logg("Local GUI server closing EXIT received",1)
                         self.conn.send("EXIT")
+                        self.conn.close()
                         conn.close()
                         self.running = False
                         break
@@ -527,7 +603,8 @@ class CoreHandler:
                         else:
                             params['settings']["max_skin_temp"] = int(msg[1])
             except Exception as e:
-                print(e)
+                logg("Error in local GUI server",3)
+                logg(e,3)
 
     def connection(self):  # connection to the daemon (secure)
         global params
@@ -607,9 +684,9 @@ class CoreHandler:
                                 sleep(0.01)
 
                     i += 1
-                    sleep(0.01)
+                    sleep(0.02)
             except :
-                sleep(0.01)
+                sleep(0.02)
 
 
 # app = MyApp(application_id="com.example.GtkApplication")
@@ -617,4 +694,4 @@ class CoreHandler:
 app = CoreHandler()
 app.run()
 
-print('-----FrontEnd Stopped------')
+logg('-----FrontEnd Stopped------',1)
